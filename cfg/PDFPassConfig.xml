@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- PDF Password Recover Configuration File -->
+
+<Config>
+  <Password>
+    <StartPassword>
+      01234567
+    </StartPassword>
+    <Length>
+      10
+    </Length>
+    <DecimalSet use="yes">
+      0123456789
+    </DecimalSet>
+    <UpperAlphaSet use="no">
+      abcdefghijklmnopqrstuvwxyz
+    </UpperAlphaSet>
+    <LowerAlphaSet use="no">
+      ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    </LowerAlphaSet>
+    <SpecialSet use="no">
+      ! &quot;#$%&amp;&apos;()*+,-./:;&lt;=&gt;?@[\]^_`{|}~
+    </SpecialSet>
+    <UserSet use="no">
+      
+    </UserSet>
+  </Password>
+  <ReportingTimeSpan>
+    10
+  </ReportingTimeSpan>
+</Config>
