@@ -4,7 +4,7 @@ using System.IO;
 using PDFPassRecovery;
 using Xunit;
 
-namespace PDFPassRecoverUnitTests
+namespace PDFParcerLib.UnitTests
 {
     public class PDFParcerLibUnitTests
     {
@@ -78,7 +78,6 @@ namespace PDFPassRecoverUnitTests
             // Act
 
             // Assert
-
             InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
@@ -114,41 +113,34 @@ namespace PDFPassRecoverUnitTests
         }
         #endregion
 
+        #region *************** Bool Entry Extraction Test ***************
+        #endregion
+
+        #region *************** Byte Array Entry Extraction Test ***************
         [Fact]
-        public void WrongExtensionOfInputFileTest()
+        public void ProcessMalformedByteArrayAsStringEntry_Test()
         {
             throw new NotImplementedException();
+
             // Arrange
             // Act
             // Assert
         }
 
         [Fact]
-        public void CorrectExtensionOfFileTest()
+        public void ProcessMalformedByteArrayAsHexadecimalStringEntry_Test()
         {
             throw new NotImplementedException();
-            // Arrange
-            // Act
-            // Assert
-        }
 
-        [Fact]
-        public void NullAsFileNameTest()
-        {
-            throw new NotImplementedException();
             // Arrange
             // Act
             // Assert
         }
+        #endregion
 
-        [Fact]
-        public void EmptyStringAsFileNameTest()
-        {
-            throw new NotImplementedException();
-            // Arrange
-            // Act
-            // Assert
-        }
+        #region *************** Numeric Entry Extraction Test ***************
+
+        #endregion
     }
 }
 
