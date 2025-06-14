@@ -379,6 +379,8 @@ namespace PDFPassRecovery
         /// <returns>ID value as a byte array</returns>
         public static byte[] ExtractIDValue(PDFFileContent fileContent)
         {
+            const int ID_ENTRY_LENGTH = 16;
+
             if (fileContent is null) throw new InvalidDataException($"The file content cannot be null");
 
             // The /ID shall present in any encrypted PDF file
@@ -388,7 +390,7 @@ namespace PDFPassRecovery
             Match regexMatch = idValueRegex.Match(fileContent.AsString);
             if (!regexMatch.Success)
             {
-                throw new InvalidDataException($"The ID file identifier is missing in the PDF document");
+                throw new InvalidDataException($"The encrypted PDF file is malformed- the file identifier (\"/ID\" array) is missing");
             }
 
             // Regexp to extract the first entry in the ID array
@@ -397,15 +399,14 @@ namespace PDFPassRecovery
             regexMatch = idFirstValueRegexp.Match(regexMatch.Value);
             if (!regexMatch.Success)
             {
-                throw new InvalidDataException($"The hexadecimal string with the ID entry is malformed");
+                throw new InvalidDataException($"The encrypted PDF file is malformed- the first hexadecimal string in the \"/ID\" array is missing");
             }
             string idFirstValue = regexMatch.Value.Trim('<', '>');
 
             byte[] idArray = PDFPassRecoverLib.ConvertHexStringToByteArray(idFirstValue);
-
-            if (idArray.Length == 0)
+            if (idArray.Length != ID_ENTRY_LENGTH)
             {
-                throw new InvalidDataException($"The ID entry has not been converted int a byte array");
+                throw new InvalidDataException($"The input string from the \"/ID\" array was too short");
             }
 
             return idArray;

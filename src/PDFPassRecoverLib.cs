@@ -441,14 +441,18 @@ namespace PDFPassRecovery
         public static byte[] ConvertHexStringToByteArray(string hexString)
         {
             string innerString = hexString;
+
+            // Per PDF specification we need to adding a "0" to the end of the hex string, if the length is not even
             if (hexString.Length % 2 != 0) innerString += '0';
+            
             byte[] outputArray = new byte[innerString.Length / 2];
 
             try
             {
                 int idCnt = 0;
                 string tempString;
-                // Converting a hex string into an array of bytes by converting every 2 symbols ino a byte
+
+                // Converting a hex string into a byte array by converting every 2 sequential symbols into a byte
                 for (int i = 0; i < innerString.Length; i += 2)
                 {
                     tempString = innerString.Substring(i, 2);
@@ -456,10 +460,9 @@ namespace PDFPassRecovery
                     idCnt++;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                PrintColoredText("Error happened while data convertion!", ConsoleColor.Red);
-                return null;
+                throw new Exception("The hex string provided contains non-hex characters");
             }
             return outputArray;
         }
