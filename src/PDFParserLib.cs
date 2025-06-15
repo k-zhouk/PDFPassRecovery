@@ -399,15 +399,21 @@ namespace PDFPassRecovery
             regexMatch = idFirstValueRegexp.Match(regexMatch.Value);
             if (!regexMatch.Success)
             {
-                throw new InvalidDataException($"The encrypted PDF file is malformed- the first hexadecimal string in the \"/ID\" array is missing");
+                throw new InvalidDataException($"The encrypted PDF file is malformed- the first string in the \"/ID\" array is missing");
             }
             string idFirstValue = regexMatch.Value.Trim('<', '>');
 
-            byte[] idArray = PDFPassRecoverLib.ConvertHexStringToByteArray(idFirstValue);
-            if (idArray.Length != ID_ENTRY_LENGTH)
+            if (string.IsNullOrEmpty(idFirstValue))
             {
-                throw new InvalidDataException($"The input string from the \"/ID\" array was too short");
+                throw new InvalidDataException($"The encrypted PDF file is malformed- the first ID string is empty");
             }
+
+            if (idFirstValue.Length != ID_ENTRY_LENGTH * 2)
+            {
+                throw new InvalidDataException($"The extracted \"/ID\" array is too short");
+            }
+
+            byte[] idArray = PDFPassRecoverLib.ConvertHexStringToByteArray(idFirstValue);
 
             return idArray;
         }

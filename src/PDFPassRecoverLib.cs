@@ -440,13 +440,16 @@ namespace PDFPassRecovery
         /// <returns>Byte array of converted values</returns>
         public static byte[] ConvertHexStringToByteArray(string hexString)
         {
+            if (string.IsNullOrEmpty(hexString))
+            {
+                throw new ArgumentException($"The input hex string can't be null or empty");
+            }
+
+            // Per PDF specification we need to add a "0" to the end of the hex string, if the length is not even
             string innerString = hexString;
-
-            // Per PDF specification we need to adding a "0" to the end of the hex string, if the length is not even
             if (hexString.Length % 2 != 0) innerString += '0';
-            
-            byte[] outputArray = new byte[innerString.Length / 2];
 
+            byte[] outputArray = new byte[innerString.Length / 2];
             try
             {
                 int idCnt = 0;
@@ -460,9 +463,9 @@ namespace PDFPassRecovery
                     idCnt++;
                 }
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
-                throw new Exception("The hex string provided contains non-hex characters");
+                throw new FormatException($"The hex string provided contains non-hex characters", ex);
             }
             return outputArray;
         }

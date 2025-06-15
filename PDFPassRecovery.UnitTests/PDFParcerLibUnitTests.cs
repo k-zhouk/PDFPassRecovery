@@ -68,7 +68,7 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_FileContentIsNull()
+        public void ExractIDEntry_FileContentIsNull_Test()
         {
             // Arrange
             PDFFileContent fileContent = null;
@@ -83,7 +83,7 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_NoIDEntryInFileContent()
+        public void ExractIDEntry_NoIDEntryInFileContent_Test()
         {
             // Arrange
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R]>> startxref 0 %%EOF";
@@ -99,13 +99,13 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_MissingBothIDEntriesInFileContent()
+        public void ExractIDEntry_MissingBothIDEntriesInFileContent_Test()
         {
             // Arrange
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R/ID[]>> startxref 0 %%EOF";
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
-            string expectedMessage = $"The encrypted PDF file is malformed- the first hexadecimal string in the \"/ID\" array is missing";
+            string expectedMessage = $"The encrypted PDF file is malformed- the file identifier (\"/ID\" array) is missing";
 
             // Act
 
@@ -115,7 +115,7 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_MissingSecondIDEntryInFileContent()
+        public void ExractIDEntry_MissingSecondIDEntryInFileContent_Test()
         {
             // Arrange
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R/ID[<b87c2efcf74c814a8b289862bced8585>]>> startxref 0 %%EOF";
@@ -132,13 +132,13 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_EmptyBothIDEntriesInFileContent()
+        public void ExractIDEntry_EmptyBothIDEntriesInFileContent_Test()
         {
             // Arrange
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R/ID[<><>]>> startxref 0 %%EOF";
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
-            string expectedMessage = $"The file identifier has not been converted into a byte array";
+            string expectedMessage = $"The encrypted PDF file is malformed- the first ID string is empty";
 
             // Act
 
@@ -148,13 +148,13 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_EmptyFirstIDEntryInFileContent()
+        public void ExractIDEntry_EmptyFirstIDEntryInFileContent_Test()
         {
             // Arrange
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R/ID[<><e22450907051744d8a778195fd01a6c1>]>> startxref 0 %%EOF";
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
-            string expectedMessage = $"The file identifier has not been converted into a byte array";
+            string expectedMessage = $"The extracted \"/ID\" array is too short";
 
             // Act
 
@@ -164,7 +164,7 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ExractIDEntry_EmptySecondIDEntryInFileContent()
+        public void ExractIDEntry_EmptySecondIDEntryInFileContent_Test()
         {
             // Arrange
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R/ID[<b87c2efcf74c814a8b289862bced8585><>]>> startxref 0 %%EOF";
@@ -187,11 +187,9 @@ namespace PDFParcerLib.UnitTests
             string testID = "trailer <</Size 33/Prev 6712/Root 21 0 R/Info 19 0 R/ID[<2efcf74c814a8b289862bced8585><>]>> startxref 0 %%EOF";
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
-            string expectedMessage = $"The input string from the \"/ID\" array was too short";
+            string expectedMessage = $"The extracted \"/ID\" array is too short";
 
             // Act
-            byte[] array = PDFParserLib.ExtractIDValue(fileContent);
-            string arrayString = BitConverter.ToString(array);
 
             // Assert
             InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));

@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using PDFPassRecovery;
 using Xunit;
 
@@ -12,7 +7,7 @@ namespace PDFValidityCheck.UnitTests
     public class PDFValidityCheckUnitTests
     {
         [Fact]
-        public void InputFileWrongExtensionTest()
+        public void InputFileWrongExtension_Test()
         {
             // Arrange
             // Act
@@ -21,7 +16,7 @@ namespace PDFValidityCheck.UnitTests
         }
 
         [Fact]
-        public void InputFileCorrectExtensionTest()
+        public void InputFileCorrectExtension_Test()
         {
             // Arrange
             // Act
@@ -30,7 +25,7 @@ namespace PDFValidityCheck.UnitTests
         }
 
         [Fact]
-        public void NullAsFileNameTest()
+        public void NullAsFileName_Test()
         {
             // Arrange
             // Act
@@ -39,7 +34,7 @@ namespace PDFValidityCheck.UnitTests
         }
 
         [Fact]
-        public void EmptyStringAsFileNameTest()
+        public void EmptyStringAsFileName_Test()
         {
             // Arrange
             // Act
