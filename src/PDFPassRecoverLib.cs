@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Linq;
 
 namespace PDFPassRecovery
 {
@@ -14,7 +12,7 @@ namespace PDFPassRecovery
     {
         public const int PADDING_OFFSET = 55;
         public const char PADDING_CHAR = ' ';
-        public delegate (string, long) BruteForceFunctionDelegate(PDF15PasswordData passwordData, PDFPasswordSettings passwordsOptions);
+        public delegate (string, long) BruteForceFunctionDelegate(PDF15PasswordData passwordData, PDFInitPassSettings passwordsOptions);
 
         /// <summary>
         /// Function generates a padded password based on the parameters provided- password length, alphabet and start string
@@ -81,7 +79,7 @@ namespace PDFPassRecovery
             }
         }
 
-        public static void RestoreEncryptedPassword<T>(Func<T, PDFPasswordSettings, (string, long)> bruteForceFunction, T passwordData, PDFPasswordSettings passwordSettings) where T : BasePasswordData
+        public static void RestoreEncryptedPassword<T>(Func<T, PDFInitPassSettings, (string, long)> bruteForceFunction, T passwordData, PDFInitPassSettings passwordSettings) where T : BasePasswordData
         {
             Console.WriteLine($"{Environment.NewLine}Starting to restore the password...");
 
@@ -139,7 +137,7 @@ namespace PDFPassRecovery
             Console.WriteLine($"{Environment.NewLine}Have a nice day!");
         }
 
-        public static void RestorePDF12EncryptedPassword(BasePasswordData v1r2PasswordData, PDFPasswordSettings passwordSettings)
+        public static void RestorePDF12EncryptedPassword(BasePasswordData v1r2PasswordData, PDFInitPassSettings passwordSettings)
         {
             switch (v1r2PasswordData.R)
             {
@@ -149,7 +147,7 @@ namespace PDFPassRecovery
             }
         }
 
-        public static void RestorePDF14Password(PDF14PasswordData passwordData, PDFPasswordSettings passwordSettings)
+        public static void RestorePDF14Password(PDF14PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             switch (passwordData.R)
             {
@@ -163,7 +161,7 @@ namespace PDFPassRecovery
             }
         }
 
-        public static void RestorePDF15Password(PDF15PasswordData passwordData, PDFPasswordSettings passwordSettings)
+        public static void RestorePDF15Password(PDF15PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             switch (passwordData.R)
             {
@@ -182,7 +180,7 @@ namespace PDFPassRecovery
         }
 
         #region ***** PSWDS BRUTE FORCE SECTION *****
-        public static (string, long) BruteForceV1R2Password(BasePasswordData passwordData, PDFPasswordSettings passwordSettings)
+        public static (string, long) BruteForceV1R2Password(BasePasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int RC4_KEY_SIZE = 5;
@@ -219,7 +217,7 @@ namespace PDFPassRecovery
                 rc4.Initialize(rc4encryptionKey);
                 rc4.Encrypt(PADDING_STRING, rc4outBuffer);
 
-                if (CompareByteArrays(rc4outBuffer, passwordData.UEntry))
+                if (SimpleByteArraysCompare(rc4outBuffer, passwordData.UEntry))
                 {
                     byte[] passwordAsBytes = new byte[passwordSettings.PasswordLength];
                     Buffer.BlockCopy(paddedPassword, 0, passwordAsBytes, 0, passwordSettings.PasswordLength);
@@ -233,7 +231,7 @@ namespace PDFPassRecovery
             return (string.Empty, passwordsCounter);
         }
 
-        private static (string, long) BruteForceV2R3Password(PDF14PasswordData passwordData, PDFPasswordSettings passwordSettings)
+        public static (string, long) BruteForceV2R3Password(PDF14PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int MD5_HASH_SIZE = 16;
@@ -301,7 +299,7 @@ namespace PDFPassRecovery
                     naiveRC4.Encrypt(rc4outBuffer, rc4outBuffer);
                 }
 
-                if (CompareByteArrays(rc4outBuffer, uEntry16))
+                if (SimpleByteArraysCompare(rc4outBuffer, uEntry16))
                 {
                     byte[] passwordAsBytes = new byte[passwordSettings.PasswordLength];
                     Buffer.BlockCopy(paddedPassword, 0, passwordAsBytes, 0, passwordSettings.PasswordLength);
@@ -315,7 +313,7 @@ namespace PDFPassRecovery
             return (string.Empty, passwordsCounter);
         }
 
-        private static (string, long) BruteForceV4R4Password(PDF15PasswordData passwordData, PDFPasswordSettings passwordSettings)
+        public static (string, long) BruteForceV4R4Password(PDF15PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
 
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
@@ -390,7 +388,7 @@ namespace PDFPassRecovery
                     naiveRC4.Encrypt(rc4outBuffer, rc4outBuffer);
                 }
 
-                if (CompareByteArrays(rc4outBuffer, uEntry16))
+                if (SimpleByteArraysCompare(rc4outBuffer, uEntry16))
                 {
                     byte[] passwordAsBytes = new byte[passwordSettings.PasswordLength];
                     Buffer.BlockCopy(paddedPassword, 0, passwordAsBytes, 0, passwordSettings.PasswordLength);
@@ -419,8 +417,8 @@ namespace PDFPassRecovery
             return totalPasswords;
         }
 
-        // Simple (no checks) comparision of 2 arrays of bytes
-        private static bool CompareByteArrays(byte[] firstArray, byte[] secondArray)
+        // Simple (no input validity checks) comparision of 2 arrays of bytes
+        private static bool SimpleByteArraysCompare(byte[] firstArray, byte[] secondArray)
         {
             for (int i = 0; i < firstArray.Length; i++)
             {
@@ -504,49 +502,5 @@ namespace PDFPassRecovery
             }
         }
         #endregion
-
-        public static PDFRestartConfig ParseConfig()
-        {
-            const string configFileName = "PDFPassConfig.xml";
-
-            string programExecPath = System.Reflection.Assembly.GetEntryAssembly().Location;
-            string pathRoot = Path.GetDirectoryName(programExecPath);
-            string configFullPath = Path.Combine(pathRoot, configFileName);
-
-            XElement xmlConfig;
-            try
-            {
-                xmlConfig = XElement.Load(configFullPath);
-            }
-            catch
-            {
-                throw;
-            }
-
-            int reportingTimeSpan = (int)xmlConfig.Element("ReportingTimeSpan");
-
-            XElement xmlPassword = xmlConfig.Element("Password");
-
-            string startPassword = (string)xmlPassword.Element("StartPassword");
-            startPassword = startPassword.Trim();
-
-            int passwordLength = (int)xmlPassword.Element("Length");
-
-            // Getting all elements with names ending with the "Set" and "use" set to "yes"
-            IEnumerable<XElement> charSets = from parameter in xmlPassword.Descendants()
-                                             where parameter.Name.LocalName.EndsWith("Set")
-                                             where parameter.Attribute("use").Value == "yes"
-                                             select parameter;
-
-            // Forming the alphabet to use for brute force
-            string alphabet = string.Empty;
-            foreach (var charSet in charSets)
-            {
-                alphabet += charSet.Value.Trim();
-            }
-
-            PDFRestartConfig pdfRecoverConfig = new PDFRestartConfig(startPassword, passwordLength, alphabet, reportingTimeSpan);
-            return pdfRecoverConfig;
-        }
     }
 }

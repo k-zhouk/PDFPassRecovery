@@ -84,10 +84,11 @@
     <Compile Include="src\OptimizedRC4.cs" />
     <Compile Include="src\PDFFileContent.cs" />
     <Compile Include="src\PDFParserLib.cs" />
+    <Compile Include="src\PDFPassConfigParser.cs" />
     <Compile Include="src\PDFPassRecoverLib.cs" />
     <Compile Include="PDFPassRecovery.cs" />
     <Compile Include="src\PDFPasswordData.cs" />
-    <Compile Include="src\PDFRestartConfig.cs" />
+    <Compile Include="src\PDFPassConfigs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

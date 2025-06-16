@@ -40,19 +40,19 @@ namespace PDFPassRecovery
                     break;
             }
 
-            PDFRestartConfig programConfig = null;
-            PDFPasswordSettings passwordSettings = null;
+            PDFPassConfig programConfig = null;
+            PDFInitPassSettings passwordSettings = null;
 
             // Reading program configuration
             Console.Write($"Getting program configuration...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
             try
             {
-                programConfig = PDFPassRecoverLib.ParseConfig();
+                programConfig = PDFPassConfigParser.ParseInitPassConfig();
                 passwordSettings = new PDFPasswordSettings(programConfig.StartPassword, programConfig.PasswordLength, programConfig.Alphabet);
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintColoredText($"Error parsing configuration file: {ex.Message}", ConsoleColor.Red);
+                PDFPassRecoverLib.PrintColoredText($"{Environment.NewLine}Error parsing configuration file: {ex.Message}", ConsoleColor.Red);
                 Environment.Exit(0);
             }
             PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);

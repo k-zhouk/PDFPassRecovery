@@ -4,19 +4,24 @@
 <State>
 
   <StopDateTime>
-    
   </StopDateTime>
+
+  <PreviousRunTime>
+  </PreviousRunTime>
   
-  <RestartPassword>
-    
-  </RestartPassword>
+  <LastCheckedPassword>
+  </LastCheckedPassword>
+
+  <Alphabet>
+  </Alphabet>  
   
   <PasswordsChecked>
-    
   </PasswordsChecked>
 
   <PasswordsLeft>
-    
   </PasswordsLeft>
+
+  <ReportingTimeSpan>
+  </ReportingTimeSpan>
   
 </State>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
 
 namespace PDFPassRecovery.Benchmark
@@ -19,9 +18,29 @@ namespace PDFPassRecovery.Benchmark
                 V = 1
             };
 
-            PDFPasswordSettings passSettings = new PDFPasswordSettings("98765", 10, "0123456789");
+            PDFInitPassSettings passSettings = new PDFInitPassSettings("987654", 10, "0123456789");
 
             (string pass, long passwords) = PDFPassRecoverLib.BruteForceV1R2Password(v1r2PasswordData, passSettings);
+
+            Debug.WriteLine($"Number of passwords checked: {passwords}");
+        }
+
+        [Benchmark]
+        public void TestV1R3Perfromance()
+        {
+            PDF14PasswordData v1r3PasswordData = new PDF14PasswordData
+            {
+                IdValue = new byte[] { 0x18, 0xBB, 0x2B, 0x79, 0xC8, 0x64, 0x5C, 0x2C, 0x95, 0x62, 0x9E, 0xDC, 0x65, 0xFD, 0x47, 0x71 },
+                OEntry = new byte[] { 0x2A, 0xF0, 0x94, 0x18, 0x72, 0x84, 0x80, 0x07, 0x13, 0x07, 0x11, 0x41, 0x9A, 0x15, 0x79, 0xB8, 0xCB, 0x7B, 0xA2, 0x1A, 0x66, 0x30, 0x49, 0xC1, 0x5B, 0xCE, 0xDA, 0xD5, 0x51, 0xAE, 0x31, 0x22 },
+                P = new byte[] { 0xFC, 0xFF, 0x00, 0x00 },
+                R = 2,
+                UEntry = new byte[] { 0x3, 0xF9, 0x3B, 0x2F, 0x75, 0xD5, 0xD2, 0x2E, 0x6D, 0xFE, 0x7C, 0xDE, 0xAD, 0xB6, 0x1C, 0xEE, 0xF0, 0x57, 0x90, 0xE1, 0x0C, 0xfC, 0x2C, 0xfA, 0x28, 0xE1, 0x52, 0xEE, 0x3C, 0xC1, 0xCB, 0x8D },
+                V = 1
+            };
+
+            PDFInitPassSettings passSettings = new PDFInitPassSettings("987654", 10, "0123456789");
+
+            (string pass, long passwords) = PDFPassRecoverLib.BruteForceV2R3Password(v1r3PasswordData, passSettings);
 
             Debug.WriteLine($"Number of passwords checked: {passwords}");
         }
