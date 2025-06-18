@@ -18,20 +18,41 @@ namespace PDFPassRecovery
             switch (args.Length)
             {
                 case 0:
+                    PDFPassRecoverLib.PrintColoredText($"No arguments have been provided!", ConsoleColor.Red);
                     PDFPassRecoverLib.PrintHelp();
                     Environment.Exit(0);
                     break;
 
                 case 1:
-                    fullFileName = args[0];
+                    string parameter = args[0];
 
-                    fi = new FileInfo(fullFileName);
+                    // Display help
+                    if (parameter == "-h")
+                    {
+                        PDFPassRecoverLib.PrintHelp();
+                        Environment.Exit(0);
+                    }
+
+                    // Otherwise treat the 1st argument as a path to the PDF file
+                    fi = new FileInfo(parameter);
                     if (!fi.Exists)
                     {
-                        PDFPassRecoverLib.PrintColoredText($"The file \"{fullFileName}\" doesn't exist", ConsoleColor.Red);
+                        PDFPassRecoverLib.PrintColoredText($"The file \"{parameter}\" doesn't exist", ConsoleColor.Red);
                         Environment.Exit(0);
                     }
                     break;
+
+                /* Commented out for the time being
+            case 2:
+                string option = args[1];
+
+                // If the option "-r" provded, then restart the previous password restore session
+                if (option == "-r")
+                {
+                    throw new NotImplementedException();
+                }
+                break;
+                */
 
                 default:
                     PDFPassRecoverLib.PrintColoredText("Too many arguments have been provided", ConsoleColor.Red);
@@ -40,15 +61,15 @@ namespace PDFPassRecovery
                     break;
             }
 
-            PDFPassConfig programConfig = null;
+            PDFPassAppSettings appSettings = null;
             PDFInitPassSettings passwordSettings = null;
 
-            // Reading program configuration
-            Console.Write($"Getting program configuration...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            // Getting initial password configuration
+            Console.Write($"Getting program and initial password configuration...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
             try
             {
-                programConfig = PDFPassConfigParser.ParseInitPassConfig();
-                passwordSettings = new PDFPasswordSettings(programConfig.StartPassword, programConfig.PasswordLength, programConfig.Alphabet);
+                appSettings = PDFPassConfigParser.GetAppSettings();
+                passwordSettings= PDFPassConfigParser.GetInitPassSettings();
             }
             catch (Exception ex)
             {

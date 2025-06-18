@@ -6,6 +6,9 @@ using Xunit;
 
 namespace PDFParcerLib.UnitTests
 {
+    /// <summary>
+    /// Class with unit tests for PDF parser lib
+    /// </summary>
     public class PDFParcerLibUnitTests
     {
         #region *************** ExtractIDEntry Tests ***************

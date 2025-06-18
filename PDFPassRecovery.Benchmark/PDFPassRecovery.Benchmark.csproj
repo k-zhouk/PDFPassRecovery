@@ -57,6 +57,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BruteForceV1R2PasswordBenchmark.cs" />
+    <Compile Include="BruteForceV2R3PasswordBenchmark.cs" />
+    <Compile Include="BruteForceV4R4PasswordBenchmark.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

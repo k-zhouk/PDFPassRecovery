@@ -58,6 +58,7 @@
             this.KeyLength = pdf14passwordData.KeyLength;
         }
 
+        // Option to encrypt the metadata or not
         public bool EncryptMetadata { get; set; }
     }
 }

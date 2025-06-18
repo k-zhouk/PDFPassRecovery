@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace PDFPassRecovery
 {
-    internal static class PDFPassConfigParser
+    public static class PDFPassConfigParser
     {
         // Field for the configruation file name
         const string configFileName = "PDFPassConfig.xml";
@@ -14,38 +14,48 @@ namespace PDFPassRecovery
         // Field for the restart configruation file name
         const string restartConfigFileName = "PDFPassState.xml";
 
-        public static PDFRestartState ParseRestartSettings(XElement restartConfigContent)
+        #region *************** APPLICATION AND PASSWORD SETTINGS PARSING ***************
+        /// <summary>
+        /// Method returns application settings
+        /// </summary>
+        /// <returns>PDFPassAppSettings object with application settings</returns>
+        /// <exception cref="InvalidDataException">Exception is thrown, if required elements are missing</exception>
+        public static PDFPassAppSettings GetAppSettings()
         {
-            throw new NotImplementedException();
+            XElement configContent = GetConfigFileContent();
+
+            string timeSpanAsString = (string)configContent.Element("ReportingTimeSpan") ?? throw new InvalidDataException($"The \"ReportingTimeSpan\" section is missing in the configuration file");
+
+            if(!int.TryParse(timeSpanAsString, out int reportingTimeSpan))
+            {
+                throw new InvalidDataException($"The \"ReportingTimeSpan\" setting is not a proper decimal number");
+            }
+            PDFPassAppSettings appSettings = new PDFPassAppSettings(reportingTimeSpan);
+
+            return appSettings;
         }
 
-        public static PDFPassAppSettings ParseAppSettings(XElement configContent)
+        /// <summary>
+        /// Method gets password settings for the first application run
+        /// </summary>
+        /// <returns>PDFInitPassSettings object with initial password, total password length and the alphabet</returns>
+        /// <exception cref="InvalidDataException"></exception>
+        public static PDFInitPassSettings GetInitPassSettings()
         {
-            throw new NotImplementedException();
-        }
+            XElement configContent = GetConfigFileContent();
 
-        public static PDFInitPassSettings ParseInitPassConfig(XElement configContent)
-        {
-            try
-            {
-                int reportingTimeSpan = (int)xmlConfig.Element("ReportingTimeSpan");
-                if (reportingTimeSpan <= 0)
-                {
-                    throw new InvalidDataException($"The \"ReportingTimeSpan\" should be greater than 0");
-                }
-            }
-            catch
-            {
-                throw new InvalidDataException($"The \"ReportingTimeSpan\" element should be a decimal number");
-            }
+            XElement xmlPassword = configContent.Element("PasswordSettings") ?? throw new InvalidDataException($"The \"PasswordSettings\" section is missing in the configuration file");
 
-
-            XElement xmlPassword = xmlConfig.Element("PasswordSettings");
-
-            string startPassword = (string)xmlPassword.Element("StartPassword");
+            string startPassword = (string)xmlPassword.Element("StartPassword") ?? throw new InvalidDataException($"The \"StartPassword\" setting is missing in the \"PasswordSettings\" section");
             startPassword = startPassword.Trim();
 
-            int passwordLength = (int)xmlPassword.Element("Length");
+            string lengthAsString = (string)xmlPassword.Element("Length") ?? throw new InvalidDataException($"The \"Length\" setting is missing in the \"PasswordSettings\" section");
+
+            if (!int.TryParse(lengthAsString, out int passwordLength))
+            {
+                throw new InvalidDataException($"The \"Length\" setting is not a proper decimal number");
+            }
+
             if (startPassword.Length > passwordLength)
             {
                 throw new InvalidDataException($"The start password length is greater than the password length");
@@ -69,9 +79,26 @@ namespace PDFPassRecovery
                 throw new InvalidDataException($"The alphabet used for password geeneration is null or empty");
             }
 
-            PDFInitPassSettings pdfRecoverConfig = new PDFInitPassSettings(startPassword, passwordLength, alphabet);
-            return pdfRecoverConfig;
+            PDFInitPassSettings initPassSettings = new PDFInitPassSettings(startPassword, passwordLength, alphabet);
+            return initPassSettings;
         }
+        #endregion
+
+        #region *************** RESTAR SETTINGS PARSING ***************
+        public static PDFRestartState GetRestartSettings()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// The function returns the content of the application restart configruation file
+        /// </summary>
+        /// <returns></returns>
+        private static XElement GetRestartConfigContent()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
 
         /// <summary>
         /// The function returns the content of the configuration file
@@ -94,15 +121,6 @@ namespace PDFPassRecovery
             }
 
             return xmlConfig;
-        }
-
-        /// <summary>
-        /// The function returns the content of the application restart configruation file
-        /// </summary>
-        /// <returns></returns>
-        private static XElement GetRestartConfigContent()
-        {
-            throw new NotImplementedException();
         }
     }
 }

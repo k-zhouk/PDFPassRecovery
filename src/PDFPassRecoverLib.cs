@@ -475,8 +475,14 @@ namespace PDFPassRecovery
         /// </summary>
         public static void PrintHelp()
         {
-            PrintColoredText($"No arguments have been provided!", ConsoleColor.Red);
-            Console.WriteLine($"Usage: PDFPassRecover.exe file_name.pdf{Environment.NewLine}");
+            Console.WriteLine($"Usage:{Environment.NewLine} PDFPassRecover.exe file_name.pdf{Environment.NewLine}");
+
+            // Commented out for the time being
+            /*
+            Console.WriteLine($"Usage:{Environment.NewLine} PDFPassRecover.exe file_name.pdf [option]{Environment.NewLine}");
+            Console.WriteLine($"[] indicate possible non-required oprions:{Environment.NewLine}");
+            Console.WriteLine($"-r --> restart the previous password recovery session. Without the option the program will start a new recovery session{Environment.NewLine}");
+            */
         }
 
         /// <summary>
