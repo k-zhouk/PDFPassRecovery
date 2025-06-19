@@ -346,7 +346,7 @@ namespace PDFPassRecovery
         /// <returns>Encryption object, if it was sucessfully extracted and null otherwise</returns>
         private static byte[] ExtractEncryptionObject(PDFFileContent fileContent)
         {
-            // Pattern to find the encryption section in the file
+            // Pattern to find the encryption section in the PDF file
             string encrytionObjRefPattern = @"/Encrypt.*?R";
             Regex encryptionObjRefRegex = new Regex(encrytionObjRefPattern, RegexOptions.Singleline);
             Match regexMatch = encryptionObjRefRegex.Match(fileContent.AsString);
@@ -370,9 +370,9 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// Function extracts the ID value from the PDF document
+        /// Function extracts the ID value from the PDF document as a byte array
         /// </summary>
-        /// <param name="fileContent">PDFFileContent object with the content of the PDF file as a string and as a binary array</param>
+        /// <param name="fileContent">PDFFileContent object with the content of the PDF file as a string and as an array of bytes</param>
         /// <returns>ID value as a byte array</returns>
         public static byte[] ExtractIDValue(PDFFileContent fileContent)
         {
@@ -416,87 +416,118 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// Funtion extracts a literal byte array (ending with the ")") from the input array starting from a certain poisition in the output array of the predefined size
+        /// Method extracts a literal byte array (ending with the ")") from the input array starting from a certain poisition and stores it in the output array of the predefined size
         /// </summary>
-        /// <param name="inputArray">Array where to search for</param>
+        /// <param name="inArray">Array where to search for</param>
         /// <param name="startPosition">Starting position in the input array</param>
-        /// <param name="outputArraySize">Size of the output array</param>
-        /// <returns></returns>
-        private static byte[] ExtractLiteralByteArray(byte[] inputArray, int startPosition, int outputArraySize)
+        /// <param name="outArraySize">Size of the output array</param>
+        /// <returns>Literal byte array</returns>
+        public static byte[] ExtractLiteralByteArray(byte[] inArray, int startPosition, int outArraySize)
         {
-            byte[] resultingArray = new byte[outputArraySize];
-
-            int i = 0;  // Counter to navigate in the input array
-            int j = 0;  // Counter to navigate in the resulting array
-            while (inputArray[startPosition + i] != ')')
+            if (inArray is null)
             {
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == 'n'))
-                {
-                    resultingArray[j] = 0x0A;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == 'r'))
-                {
-                    resultingArray[j] = 0x0D;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == 't'))
-                {
-                    resultingArray[j] = 0x09;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == 'b'))
-                {
-                    resultingArray[j] = 0x08;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == 'f'))
-                {
-                    resultingArray[j] = 0x0C;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == '\\'))
-                {
-                    resultingArray[j] = 0x5C;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == '('))
-                {
-                    resultingArray[j] = 0x28;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-                if ((inputArray[startPosition + i] == '\\') && (inputArray[startPosition + i + 1] == ')'))
-                {
-                    resultingArray[j] = 0x29;
-                    i += 2;
-                    j++;
-                    continue;
-                }
-
-                resultingArray[j] = inputArray[startPosition + i];
-                i++;
-                j++;
+                throw new InvalidDataException($"The input array cannnot be null");
             }
 
-            return resultingArray;
+            if (inArray.Length == 0)
+            {
+                throw new InvalidDataException($"The length of the inout array should be at least 3 bytes");
+            }
+
+            if (startPosition <= 0)
+            {
+                throw new InvalidDataException($"The start position in the input array cannot be negative or zero");
+            }
+
+            if (startPosition > inArray.Length)
+            {
+                throw new InvalidDataException($"The start position exceeds the size of the input array");
+            }
+
+            if (outArraySize <= 0)
+            {
+                throw new InvalidDataException($"The output array size cannot be negative or zero");
+            }
+
+            byte[] outArray = new byte[outArraySize];
+
+            int i = 0;          // Counter to track 
+            int inCnt = 0;      // Counter to navigate in the input array
+            int outCnt = 0;     // Counter to navigate in the output array
+            while ((startPosition + i) < inArray.Length)
+            {
+                if (inArray[startPosition + inCnt] == ')')
+                {
+                    return outArray;
+                }
+
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'n'))
+                {
+                    outArray[outCnt] = 0x0A;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'r'))
+                {
+                    outArray[outCnt] = 0x0D;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 't'))
+                {
+                    outArray[outCnt] = 0x09;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'b'))
+                {
+                    outArray[outCnt] = 0x08;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'f'))
+                {
+                    outArray[outCnt] = 0x0C;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == '\\'))
+                {
+                    outArray[outCnt] = 0x5C;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == '('))
+                {
+                    outArray[outCnt] = 0x28;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == ')'))
+                {
+                    outArray[outCnt] = 0x29;
+                    inCnt += 2;
+                    outCnt++;
+                    continue;
+                }
+
+                outArray[outCnt] = inArray[startPosition + inCnt];
+                inCnt++;
+                outCnt++;
+            }
+
+            throw new InvalidDataException($"The input literal array doesn't contain the closing parenthese");
         }
 
         /// <summary>

@@ -200,12 +200,13 @@ namespace PDFParcerLib.UnitTests
         }
         #endregion
 
-        #region *************** Bool Entry Extraction Test ***************
+        #region *************** Bool Entry Extraction Tests ***************
+
         #endregion
 
-        #region *************** Byte Array Entry Extraction Test ***************
+        #region *************** Byte Array Entry Extraction Tests ***************
         [Fact]
-        public void ProcessMalformedByteArrayAsStringEntry_Test()
+        public void ExtractLiteralByteArray_NullInArray_Test()
         {
             throw new NotImplementedException();
 
@@ -215,7 +216,7 @@ namespace PDFParcerLib.UnitTests
         }
 
         [Fact]
-        public void ProcessMalformedByteArrayAsHexadecimalStringEntry_Test()
+        public void ExtractLiteralByteArray_EmptyInArray_Test()
         {
             throw new NotImplementedException();
 
@@ -223,9 +224,63 @@ namespace PDFParcerLib.UnitTests
             // Act
             // Assert
         }
+
+        [Fact]
+        public void ExtractLiteralByteArray_NegativeStartPosition_Test()
+        {
+            throw new NotImplementedException();
+
+            // Arrange
+            // Act
+            // Assert
+        }
+
+        [Fact]
+        public void ExtractLiteralByteArray_StartPositionGreaterThanInputLength_Test()
+        {
+            throw new NotImplementedException();
+
+            // Arrange
+            // Act
+            // Assert
+        }
+
+        [Fact]
+        public void ExtractLiteralByteArray_NegativeOrZeroOutArraySize_Test()
+        {
+            throw new NotImplementedException();
+
+            // Arrange
+            // Act
+            // Assert
+        }
+
+        [Fact]
+        // Extract a normal entry
+        public void ExtractLiteralByteArray_Test()
+        {
+            throw new NotImplementedException();
+
+            // Arrange
+            // Act
+            // Assert
+        }
+
+        [Fact]
+        // Extract an entry without the closing brace
+        public void ExtractLiteralByteArray_WithoutClosingBrace_Test()
+        {
+            throw new NotImplementedException();
+
+            // Arrange
+            // Act
+            // Assert
+        }
+
+
         #endregion
 
-        #region *************** Numeric Entry Extraction Test ***************
+        #region *************** Numeric Entry Extraction Tests ***************
 
         #endregion
     }
