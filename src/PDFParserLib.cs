@@ -48,7 +48,6 @@ namespace PDFPassRecovery
         static bool IsPDFFileHeaderPresent(PDFFileContent fileContent)
         {
             const string PDF_HEADER = "%PDF";
-
             if (fileContent.AsString.Contains(PDF_HEADER))
             {
                 return true;
@@ -66,7 +65,6 @@ namespace PDFPassRecovery
         static bool IsPDFFileTrailerPresent(PDFFileContent fileContent)
         {
             const string PDF_TRAILER = "%%EOF";
-
             if (fileContent.AsString.Contains(PDF_TRAILER))
             {
                 return true;
@@ -96,7 +94,7 @@ namespace PDFPassRecovery
         #endregion
 
         /// <summary>
-        /// The function returns version of the PDF file
+        /// Method returns version of the PDF file
         /// </summary>
         /// <param name="fileContent">fileContent should be supplied as a string</param>
         /// <returns>PDF version returned as a string. If the version cannot be extracted, then an empty string is returned</returns>
@@ -117,20 +115,19 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// The function reads the file provided and stores the content as a byte array and as a string
+        /// Method reads and stores the content of the PDF as a byte array and as a string
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>PDFFileContentObject with the file content</returns>
         public static PDFFileContent GetPDFFileConent(string fileName)
         {
-            byte[] byteFileContent;
-            string stringFileContent;
-
             if (string.IsNullOrEmpty(fileName))
             {
                 throw new ArgumentException("The file name cannot be null or empty!");
             }
 
+            byte[] byteFileContent;
+            string stringFileContent;
             try
             {
                 byteFileContent = File.ReadAllBytes(fileName);
@@ -343,10 +340,10 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// Function extracts the size encryption section and encryption object offset in the PDF document
+        /// Function extracts the encryption object as a byte array
         /// </summary>
-        /// <param name="fileContent"></param>
-        /// <returns></returns>
+        /// <param name="fileContent">PDFFileContent object that contains content of a PDF file as a string and as a byte array</param>
+        /// <returns>Encryption object, if it was sucessfully extracted and null otherwise</returns>
         private static byte[] ExtractEncryptionObject(PDFFileContent fileContent)
         {
             // Pattern to find the encryption section in the file
