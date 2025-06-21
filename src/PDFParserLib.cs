@@ -212,9 +212,11 @@ namespace PDFPassRecovery
             PDF14PasswordData pdf14PasswordData = ExtractPDF14EncryptionObjectData(encryptionObject);
             PDF15PasswordData pdf15PasswordData = new PDF15PasswordData(pdf14PasswordData);
 
+            // TODO: Rewrite, as the "/EncryptMetadata" entry might not be in the encryption object section. This not an excpetional situation
+
             try
             {
-                pdf15PasswordData.EncryptMetadata = GetBooleanEntry("/EncryptMetadata", encryptionObject);
+                pdf15PasswordData.EncryptMetadata = GetBooleanEntryValue("/EncryptMetadata", encryptionObject);
             }
             catch { }
             {
@@ -225,12 +227,12 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// The function returns a byte array entry from an input array. The entry in the input array can be stored as a hexadecimal string or as a string
+        /// Method returns a byte array entry from an input array. The entry in the input array can be stored as a hexadecimal string or as a string
         /// </summary>
         /// <param name="entryName">Name of the entry to search for</param>
         /// <param name="inputArray">Input array to search in</param>
         /// <param name="entrySize">Size of the entry to return</param>
-        /// <returns></returns>
+        /// <returns>Entry value as a byte array</returns>
         private static byte[] GetArrayEntry(string entryName, byte[] inputArray, int entrySize)
         {
             // Processing possible errors
@@ -290,17 +292,23 @@ namespace PDFPassRecovery
             return outArray;
         }
 
-        private static int GetNumericalEntry(string entryName, byte[] inputArray)
+        /// <summary>
+        /// Method gets a numerical value of an entry
+        /// </summary>
+        /// <param name="entryName">Name of the entry</param>
+        /// <param name="inArray">Input array to seach in</param>
+        /// <returns>Numerical value of the entry as an int</returns>
+        /// <exception cref="FormatException">Exception is thrown, if the entry's value cannot be converted into an int</exception>
+        private static int GetNumericalEntry(string entryName, byte[] inArray)
         {
             string valueString = string.Empty;
 
-            int startIndex = GetStringIndexInArray(entryName, inputArray);
+            int startIndex = GetStringIndexInArray(entryName, inArray);
             int curPointer = startIndex + entryName.Length;
 
-            while (inputArray[curPointer] != '/' &&
-                inputArray[curPointer] != '>')
+            while ((inArray[curPointer] != '/') && (inArray[curPointer] != '>'))
             {
-                valueString += Convert.ToChar(inputArray[curPointer]);
+                valueString += Convert.ToChar(inArray[curPointer]);
                 curPointer++;
             }
             valueString = valueString.Trim();
@@ -312,17 +320,38 @@ namespace PDFPassRecovery
             else return value;
         }
 
-        private static bool GetBooleanEntry(string entryName, byte[] inputArray)
+        /// <summary>
+        /// Method extracts a value of the boolean entry from the input byte array
+        /// </summary>
+        /// <param name="entryName">Name of the entry as a string to search for</param>
+        /// <param name="inArray">Input array to search the value in</param>
+        /// <returns>Boolean entry value (true of false)</returns>
+        /// <exception cref="InvalidDataException"></exception>
+        private static bool GetBooleanEntryValue(string entryName, byte[] inArray)
         {
+            if (string.IsNullOrEmpty(entryName))
+            {
+                throw new InvalidDataException($"The input string cannot be null or empty");
+            }
+
+            if ((inArray is null) || (inArray.Length == 0))
+            {
+                throw new InvalidDataException($"The input array cannot by null or empty");
+            }
+
+            if (entryName.Length > inArray.Length)
+            {
+                throw new InvalidDataException($"The entry name is longer than the array to search in");
+            }
+
             string valueString = string.Empty;
 
-            int startIndex = GetStringIndexInArray(entryName, inputArray);
+            int startIndex = GetStringIndexInArray(entryName, inArray);
             int curPointer = startIndex + entryName.Length;
 
-            while (inputArray[curPointer] != '/' &&
-                inputArray[curPointer] != '>')
+            while ((inArray[curPointer] != '/') && (inArray[curPointer] != '>'))
             {
-                valueString += Convert.ToChar(inputArray[curPointer]);
+                valueString += Convert.ToChar(inArray[curPointer]);
                 curPointer++;
             }
 
@@ -335,15 +364,15 @@ namespace PDFPassRecovery
                 case "false":
                     return false;
                 default:
-                    throw new FormatException($"The unknown value in the bool entry");
+                    throw new InvalidDataException($"The unknown value in the bool entry");
             }
         }
 
         /// <summary>
-        /// Function extracts the encryption object as a byte array
+        /// Method extracts the encryption object from the PDF file
         /// </summary>
         /// <param name="fileContent">PDFFileContent object that contains content of a PDF file as a string and as a byte array</param>
-        /// <returns>Encryption object, if it was sucessfully extracted and null otherwise</returns>
+        /// <returns>Encryption object as a byte array, if it was sucessfully extracted and null otherwise</returns>
         private static byte[] ExtractEncryptionObject(PDFFileContent fileContent)
         {
             // Pattern to find the encryption section in the PDF file
@@ -370,7 +399,7 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// Function extracts the ID value from the PDF document as a byte array
+        /// Method extracts the ID value from the PDF document as a byte array
         /// </summary>
         /// <param name="fileContent">PDFFileContent object with the content of the PDF file as a string and as an array of bytes</param>
         /// <returns>ID value as a byte array</returns>
@@ -429,7 +458,7 @@ namespace PDFPassRecovery
                 throw new InvalidDataException($"The input array cannnot be null");
             }
 
-            if (inArray.Length == 0)
+            if (inArray.Length < 3)
             {
                 throw new InvalidDataException($"The length of the inout array should be at least 3 bytes");
             }
@@ -531,11 +560,11 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// The function resturns an index of a string in the array, first the string is converted into a byte array
+        /// Method resturns an index of a string in the array, but firstly the string is converted into a byte array
         /// </summary>
-        /// <param name="inString">Input string to search for</param>
-        /// <param name="inArray">Input array</param>
-        /// <returns></returns>
+        /// <param name="inString">String to search for</param>
+        /// <param name="inArray">Input array to search in</param>
+        /// <returns>Returns an index of the input string or -1, if the string has not been found</returns>
         private static int GetStringIndexInArray(string inString, byte[] inArray)
         {
             if (inArray is null)
@@ -548,7 +577,12 @@ namespace PDFPassRecovery
                 throw new InvalidDataException($"The input string array cannot be null or empty");
             }
 
-            // Converting the string into a subarray first
+            if (inString.Length > inArray.Length)
+            {
+                throw new InvalidDataException($"The input string is longer than the input byte array");
+            }
+
+            // Converting the string into a byte representation first
             byte[] subArray = Encoding.ASCII.GetBytes(inString);
 
             int index = -1;
@@ -564,7 +598,6 @@ namespace PDFPassRecovery
                     if (j == subArray.Length) return i;
                 }
             }
-
             return index;
         }
     }

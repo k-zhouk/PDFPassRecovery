@@ -34,25 +34,37 @@ namespace PDFPassRecovery
                     }
 
                     // Otherwise treat the 1st argument as a path to the PDF file
+                    fullFileName = parameter;
                     fi = new FileInfo(parameter);
                     if (!fi.Exists)
                     {
-                        PDFPassRecoverLib.PrintColoredText($"The file \"{parameter}\" doesn't exist", ConsoleColor.Red);
+                        PDFPassRecoverLib.PrintColoredText($"{Environment.NewLine}The file \"{parameter}\" doesn't exist", ConsoleColor.Red);
                         Environment.Exit(0);
                     }
                     break;
 
-                /* Commented out for the time being
-            case 2:
-                string option = args[1];
+                /* Draft for the future implementations
+                 * Commented out for the time being
+                case 2:
+                    string option = args[1];
 
-                // If the option "-r" provded, then restart the previous password restore session
-                if (option == "-r")
-                {
-                    throw new NotImplementedException();
-                }
-                break;
-                */
+                    // "-r" for restart of the previous password restore session
+                    if (option == "-r")
+                    {
+                        throw new NotImplementedException();
+                    }
+                    // Use logical CPU cores
+                    if (option == "-l")
+                    {
+                        throw new NotImplementedException();
+                    }
+                    // Use physical CPU cores only
+                    if (option == "-p")
+                    {
+                        throw new NotImplementedException();
+                    }
+                    break;
+                    */
 
                 default:
                     PDFPassRecoverLib.PrintColoredText("Too many arguments have been provided", ConsoleColor.Red);
@@ -69,7 +81,7 @@ namespace PDFPassRecovery
             try
             {
                 appSettings = PDFPassConfigParser.GetAppSettings();
-                passwordSettings= PDFPassConfigParser.GetInitPassSettings();
+                passwordSettings = PDFPassConfigParser.GetInitPassSettings();
             }
             catch (Exception ex)
             {
@@ -88,7 +100,7 @@ namespace PDFPassRecovery
             string fileExtension = Path.GetExtension(fullFileName).ToUpper();
             if (fileExtension != ".PDF")
             {
-                PDFPassRecoverLib.PrintColoredText($"The extension of the file must be \"PDF\"", ConsoleColor.Red);
+                PDFPassRecoverLib.PrintColoredText($"File extension must be \"PDF\"", ConsoleColor.Red);
                 Environment.Exit(0);
             }
             PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);

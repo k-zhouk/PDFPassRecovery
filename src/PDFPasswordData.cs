@@ -35,12 +35,12 @@
         // Copy constructor
         public PDF14PasswordData(BasePasswordData pdf12passwordData)
         {
-            this.V = pdf12passwordData.V;
-            this.R = pdf12passwordData.R;
-            this.OEntry = pdf12passwordData.OEntry;
-            this.UEntry = pdf12passwordData.UEntry;
-            this.P = pdf12passwordData.P;
-            this.IdValue = pdf12passwordData.IdValue;
+            V = pdf12passwordData.V;
+            R = pdf12passwordData.R;
+            OEntry = pdf12passwordData.OEntry;
+            UEntry = pdf12passwordData.UEntry;
+            P = pdf12passwordData.P;
+            IdValue = pdf12passwordData.IdValue;
         }
 
         // Length of the encryption key
@@ -55,7 +55,7 @@
         // Copy constructor
         public PDF15PasswordData(PDF14PasswordData pdf14passwordData) : base(pdf14passwordData)
         {
-            this.KeyLength = pdf14passwordData.KeyLength;
+            KeyLength = pdf14passwordData.KeyLength;
         }
 
         // Option to encrypt the metadata or not

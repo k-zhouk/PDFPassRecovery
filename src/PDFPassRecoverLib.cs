@@ -25,7 +25,7 @@ namespace PDFPassRecovery
         /// <exception cref="ArgumentException">Exception is thrown, if the string to start with is longer, then the password length</exception>
         public static IEnumerable<byte[]> GeneratePaddedPassword(int passwordLength, string alphabet, string startPassword)
         {
-            // Padding string from PDF1.2 ~ 1.4 specification
+            // Padding string from PDF 1.2 ~ 1.6 specification
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
 
             const int PADDED_PASSWORD_LENGTH = 32;
@@ -137,6 +137,7 @@ namespace PDFPassRecovery
             Console.WriteLine($"{Environment.NewLine}Have a nice day!");
         }
 
+        // Brute force function for PDF 1.2
         public static void RestorePDF12EncryptedPassword(BasePasswordData v1r2PasswordData, PDFInitPassSettings passwordSettings)
         {
             switch (v1r2PasswordData.R)
@@ -147,6 +148,7 @@ namespace PDFPassRecovery
             }
         }
 
+        // Brute force function for PDF 1.4
         public static void RestorePDF14Password(PDF14PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             switch (passwordData.R)
@@ -161,6 +163,7 @@ namespace PDFPassRecovery
             }
         }
 
+        // Brute force function for PDF 1.5
         public static void RestorePDF15Password(PDF15PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             switch (passwordData.R)
