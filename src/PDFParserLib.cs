@@ -207,22 +207,24 @@ namespace PDFPassRecovery
             return pdf15PasswordData;
         }
 
+        /// <summary>
+        /// Method extracts the PDF 1.5/ PDF 1.6 encryption object data
+        /// </summary>
+        /// <param name="encryptionObject">Encryption object as a byte array</param>
+        /// <returns>PDF15PasswordData object</returns>
         private static PDF15PasswordData ExtractPDF15EncryptionObjectData(byte[] encryptionObject)
         {
             PDF14PasswordData pdf14PasswordData = ExtractPDF14EncryptionObjectData(encryptionObject);
             PDF15PasswordData pdf15PasswordData = new PDF15PasswordData(pdf14PasswordData);
 
-            // TODO: Rewrite, as the "/EncryptMetadata" entry might not be in the encryption object section. This not an excpetional situation
-
-            try
+            if (TryGetBooleanEntryValue("/EncryptMetadata", encryptionObject, out bool entryValue))
             {
-                pdf15PasswordData.EncryptMetadata = GetBooleanEntryValue("/EncryptMetadata", encryptionObject);
+                pdf15PasswordData.EncryptMetadata = entryValue;
             }
-            catch { }
+            else
             {
-                pdf15PasswordData.EncryptMetadata = true;
+                pdf15PasswordData.EncryptMetadata = false;
             }
-
             return pdf15PasswordData;
         }
 
@@ -321,13 +323,14 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
-        /// Method extracts a value of the boolean entry from the input byte array
+        /// Method tries to get a value of the boolean entry from the input byte array.
         /// </summary>
         /// <param name="entryName">Name of the entry as a string to search for</param>
         /// <param name="inArray">Input array to search the value in</param>
-        /// <returns>Boolean entry value (true of false)</returns>
-        /// <exception cref="InvalidDataException"></exception>
-        private static bool GetBooleanEntryValue(string entryName, byte[] inArray)
+        /// <param name="entryValue">Output parameter to store the value of the boolean entry</param>
+        /// <returns>Fasle, if entry has not been found. True and the entry value as the output parameter</returns>
+        /// <exception cref="InvalidDataException">An exception is thrown, if the entry has been found, but has a value different from true/ false</exception>
+        public static bool TryGetBooleanEntryValue(string entryName, byte[] inArray, out bool entryValue)
         {
             if (string.IsNullOrEmpty(entryName))
             {
@@ -347,6 +350,14 @@ namespace PDFPassRecovery
             string valueString = string.Empty;
 
             int startIndex = GetStringIndexInArray(entryName, inArray);
+
+            // The entry has not been found in the byte array
+            if (startIndex == -1)
+            {
+                entryValue = false;
+                return false;
+            }
+
             int curPointer = startIndex + entryName.Length;
 
             while ((inArray[curPointer] != '/') && (inArray[curPointer] != '>'))
@@ -354,15 +365,16 @@ namespace PDFPassRecovery
                 valueString += Convert.ToChar(inArray[curPointer]);
                 curPointer++;
             }
-
             valueString = valueString.Trim();
 
             switch (valueString)
             {
                 case "true":
+                    entryValue = true;
                     return true;
                 case "false":
-                    return false;
+                    entryValue = false;
+                    return true;
                 default:
                     throw new InvalidDataException($"The unknown value in the bool entry");
             }

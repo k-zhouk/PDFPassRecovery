@@ -12,7 +12,6 @@ namespace PDFPassRecovery
     {
         public const int PADDING_OFFSET = 55;
         public const char PADDING_CHAR = ' ';
-        public delegate (string, long) BruteForceFunctionDelegate(PDF15PasswordData passwordData, PDFInitPassSettings passwordsOptions);
 
         /// <summary>
         /// Function generates a padded password based on the parameters provided- password length, alphabet and start string
@@ -480,7 +479,7 @@ namespace PDFPassRecovery
         {
             Console.WriteLine($"Usage:{Environment.NewLine} PDFPassRecover.exe file_name.pdf{Environment.NewLine}");
 
-            // Commented out for the time being
+            // Will be usedin the future, commented out for the time being
             /*
             Console.WriteLine($"Usage:{Environment.NewLine} PDFPassRecover.exe file_name.pdf [option]{Environment.NewLine}");
             Console.WriteLine($"[] indicate possible non-required oprions:{Environment.NewLine}");
