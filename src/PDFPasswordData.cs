@@ -52,6 +52,7 @@
         // Default constructor
         public PDF15PasswordData() { }
 
+        //TODO: This need to be fixed--> inheritance should be from BasePasswordData, as the key length is extracted differently in PDF 1.4 and PDF 1.5
         // Copy constructor
         public PDF15PasswordData(PDF14PasswordData pdf14passwordData) : base(pdf14passwordData)
         {

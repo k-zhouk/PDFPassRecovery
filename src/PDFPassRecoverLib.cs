@@ -180,8 +180,7 @@ namespace PDFPassRecovery
                     break;
             }
         }
-
-        #region ***** PSWDS BRUTE FORCE SECTION *****
+        #region ***** PASSWORDS BRUTE FORCE FUNCTIONS SECTION *****
         public static (string, long) BruteForceV1R2Password(BasePasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
@@ -406,7 +405,7 @@ namespace PDFPassRecovery
 
 
         /// <summary>
-        /// Function claculates a number of passwords to check based on the password length, alphabet and starting password
+        /// Function claculates a number of passwords to check based on the password length and alphabet
         /// </summary>
         /// <param name="passwordLength">Length of the password</param>
         /// <param name="alphabet">Password alphabet</param>
@@ -488,26 +487,88 @@ namespace PDFPassRecovery
         }
 
         /// <summary>
+        /// Prints a fatal message in red color
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        /// <param name="writeLine">True will print a new line character</param>
+        public static void PrintFatal(string message, bool writeLine = true)
+        {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            if (writeLine)
+            {
+                Console.WriteLine(message);
+            }
+            else
+            {
+                Console.Write(message);
+            }
+            Console.ForegroundColor = originalColor;
+        }
+
+        /// <summary>
+        /// Prints a fatal message in yellow color
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        /// <param name="writeLine">True will print a new line character</param>
+        public static void PrintWarning(string message, bool writeLine = true)
+        {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+            if (writeLine)
+            {
+                Console.WriteLine(message);
+            }
+            else
+            {
+                Console.Write(message);
+            }
+            Console.ForegroundColor = originalColor;
+        }
+
+        /// <summary>
+        /// Prints a fatal message in green color
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        /// <param name="writeLine">True will print a new line character</param>
+        public static void PrintInfo(string message, bool writeLine = true)
+        {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            if (writeLine)
+            {
+                Console.WriteLine(message);
+            }
+            else
+            {
+                Console.Write(message);
+            }
+            Console.ForegroundColor = originalColor;
+        }
+
+        /// <summary>
         /// Function prints a text to the console in the selected color
         /// </summary>
         /// <param name="message">Message to be printed</param>
         /// <param name="textColor">Color specified as ConsoleColor enum</param>
+        /// <param name="writeLine">True will print a new line character</param>
         public static void PrintColoredText(string message, ConsoleColor textColor, bool writeLine = true)
         {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = textColor;
+
             if (writeLine)
             {
-                ConsoleColor originalColor = Console.ForegroundColor;
-                Console.ForegroundColor = textColor;
                 Console.WriteLine(message);
-                Console.ForegroundColor = originalColor;
             }
             else
             {
-                ConsoleColor originalColor = Console.ForegroundColor;
-                Console.ForegroundColor = textColor;
                 Console.Write(message);
-                Console.ForegroundColor = originalColor;
             }
+            Console.ForegroundColor = originalColor;
         }
         #endregion
     }

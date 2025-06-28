@@ -204,7 +204,7 @@ namespace PDFPassRecovery.UnitTests
         {
             // Arrange
             /*
-             Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
+            Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
             000002D0                              32 31 20 30 20 6F 62           21 0 ob
             000002E0  6A 3C 3C 2F 52 20 34 2F  4C 65 6E 67 74 68 20 31  j<</R 4/Length 1
             000002F0  32 38 2F 46 69 6C 74 65  72 2F 53 74 61 6E 64 61  28/Filter/Standa
@@ -253,7 +253,7 @@ namespace PDFPassRecovery.UnitTests
         {
             // Arrange
             /*
-             Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
+            Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
             000002D0                              32 31 20 30 20 6F 62           21 0 ob
             000002E0  6A 3C 3C 2F 52 20 34 2F  4C 65 6E 67 74 68 20 31  j<</R 4/Length 1
             000002F0  32 38 2F 46 69 6C 74 65  72 2F 53 74 61 6E 64 61  28/Filter/Standa
@@ -302,7 +302,7 @@ namespace PDFPassRecovery.UnitTests
         {
             // Arrange
             /*
-             Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
+            Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
             000002D0                              32 31 20 30 20 6F 62           21 0 ob
             000002E0  6A 3C 3C 2F 52 20 34 2F  4C 65 6E 67 74 68 20 31  j<</R 4/Length 1
             000002F0  32 38 2F 46 69 6C 74 65  72 2F 53 74 61 6E 64 61  28/Filter/Standa
@@ -337,60 +337,102 @@ namespace PDFPassRecovery.UnitTests
                                     0x0D, 0x65, 0x6E, 0x64, 0x6F, 0x62, 0x6A};
 
             string entryName = null;
-
-            // Act
-            bool extractionResult = PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionObject, out bool entryValue);
-
-            // Assert
-            Assert.False(extractionResult);
-
-            !!!
-            // Arrange
-            PDFFileContent fileContent = null;
+            string expectedMessage = $"The entry name cannot be null or empty";
             Type exceptionType = typeof(InvalidDataException);
-            string expectedMessage = $"The file content cannot be null";
-
-            // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionObject, out bool entryValue));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
         [Fact]
         public void TryGetBooleanEntryValue_NullInputArray_Test()
         {
-            // Arrange
-            // Act
+            byte[] encryptionObject = null;
+
+            string entryName = "EncryptMetadata";
+            string expectedMessage = $"The input array cannot by null or empty";
+            Type exceptionType = typeof(InvalidDataException);
+
             // Assert
-            throw new NotImplementedException();
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionObject, out bool entryValue));
+            Assert.Equal(expectedMessage, ex.Message);
         }
 
         [Fact]
         public void TryGetBooleanEntryValue_EmptyInputArray_Test()
         {
-            // Arrange
-            // Act
+            byte[] encryptionObject = { };
+
+            string entryName = "EncryptMetadata";
+            string expectedMessage = $"The input array cannot by null or empty";
+            Type exceptionType = typeof(InvalidDataException);
+
             // Assert
-            throw new NotImplementedException();
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionObject, out bool entryValue));
+            Assert.Equal(expectedMessage, ex.Message);
         }
 
         [Fact]
         public void TryGetBooleanEntryValue_TooLongEntryName_Test()
         {
-            // Arrange
-            // Act
+            byte[] encryptionObject = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+
+            string entryName = "/EncryptMetadata";
+            string expectedMessage = $"The entry name is longer than the array to search in";
+            Type exceptionType = typeof(InvalidDataException);
+
             // Assert
-            throw new NotImplementedException();
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionObject, out bool entryValue));
+            Assert.Equal(expectedMessage, ex.Message);
         }
 
         [Fact]
         public void TryGetBooleanEntryValue_UnknownEntryValue_Test()
         {
             // Arrange
-            // Act
+            /*
+            Hex View  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
+            000002D0                              32 31 20 30 20 6F 62           21 0 ob
+            000002E0  6A 3C 3C 2F 52 20 34 2F  4C 65 6E 67 74 68 20 31  j<</R 4/Length 1
+            000002F0  32 38 2F 46 69 6C 74 65  72 2F 53 74 61 6E 64 61  28/Filter/Standa
+            00000300  72 64 2F 4F 28 B1 F4 A0  77 BE 87 C3 C0 F5 97 5D  rd/O(...w......]
+            00000310  5C 72 B1 7F CD 9E 7C 88  4B 40 33 48 79 A5 27 51  \r....|.K@3Hy.'Q
+            00000320  33 B2 C5 FF 67 07 29 2F  50 20 2D 33 31 33 32 2F  3...g.)/P -3132/
+            00000330  55 28 41 94 E6 58 50 EF  3D 20 E1 C9 BA 2D 30 CF  U(A..XP.= ...-0.
+            00000340  C4 B0 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+            00000350  00 00 29 2F 56 20 34 2F  43 46 3C 3C 2F 53 74 64  ..)/V 4/CF<</Std
+            00000360  43 46 3C 3C 2F 4C 65 6E  67 74 68 20 31 36 2F 43  CF<</Length 16/C
+            00000370  46 4D 2F 56 32 2F 41 75  74 68 45 76 65 6E 74 2F  FM/V2/AuthEvent/
+            00000380  44 6F 63 4F 70 65 6E 3E  3E 3E 3E 2F 53 74 6D 46  DocOpen>>>>/StmF
+            00000390  2F 53 74 64 43 46 2F 53  74 72 46 2F 53 74 64 43  /StdCF/StrF/StdC
+            000003A0  46 2F 45 6E 63 72 79 70  74 4D 65 74 61 64 61 74  F/EncryptMetadat
+            000003B0  61 20 66 61 6C 73 65 3E  3E 0D 65 6E 64 6F 62 6A  a unknown>>.endobj
+             */
+
+            byte[] encryptionObject = {0x32, 0x31, 0x20, 0x30, 0x20, 0x6F, 0x62, 0x6A, 0x3C, 0x3C, 0x2F, 0x52, 0x20, 0x34, 0x2F, 0x4C,
+                                    0x65, 0x6E, 0x67, 0x74, 0x68, 0x20, 0x31, 0x32, 0x38, 0x2F, 0x46, 0x69, 0x6C, 0x74, 0x65, 0x72,
+                                    0x2F, 0x53, 0x74, 0x61, 0x6E, 0x64, 0x61, 0x72, 0x64, 0x2F, 0x4F, 0x28, 0xB1, 0xF4, 0xA0, 0x77,
+                                    0xBE, 0x87, 0xC3, 0xC0, 0xF5, 0x97, 0x5D, 0x5C, 0x72, 0xB1, 0x7F, 0xCD, 0x9E, 0x7C, 0x88, 0x4B,
+                                    0x40, 0x33, 0x48, 0x79, 0xA5, 0x27, 0x51, 0x33, 0xB2, 0xC5, 0xFF, 0x67, 0x07, 0x29, 0x2F, 0x50,
+                                    0x20, 0x2D, 0x33, 0x31, 0x33, 0x32, 0x2F, 0x55, 0x28, 0x41, 0x94, 0xE6, 0x58, 0x50, 0xEF, 0x3D,
+                                    0x20, 0xE1, 0xC9, 0xBA, 0x2D, 0x30, 0xCF, 0xC4, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x29, 0x2F, 0x56, 0x20, 0x34, 0x2F, 0x43,
+                                    0x46, 0x3C, 0x3C, 0x2F, 0x53, 0x74, 0x64, 0x43, 0x46, 0x3C, 0x3C, 0x2F, 0x4C, 0x65, 0x6E, 0x67,
+                                    0x74, 0x68, 0x20, 0x31, 0x36, 0x2F, 0x43, 0x46, 0x4D, 0x2F, 0x56, 0x32, 0x2F, 0x41, 0x75, 0x74,
+                                    0x68, 0x45, 0x76, 0x65, 0x6E, 0x74, 0x2F, 0x44, 0x6F, 0x63, 0x4F, 0x70, 0x65, 0x6E, 0x3E, 0x3E,
+                                    0x3E, 0x3E, 0x2F, 0x53, 0x74, 0x6D, 0x46, 0x2F, 0x53, 0x74, 0x64, 0x43, 0x46, 0x2F, 0x53, 0x74,
+                                    0x72, 0x46, 0x2F, 0x53, 0x74, 0x64, 0x43, 0x46, 0x2F, 0x45, 0x6E, 0x63, 0x72, 0x79, 0x70, 0x74,
+                                    0x4D, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x20, 0x75, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E, 0x3E, 0x3E,
+                                    0x0D, 0x65, 0x6E, 0x64, 0x6F, 0x62, 0x6A};
+
+            string entryName = "/EncryptMetadata";
+            string expectedMessage = $"The bool entry contains an unknown value";
+            Type exceptionType = typeof(InvalidDataException);
+
             // Assert
-            throw new NotImplementedException();
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionObject, out bool entryValue));
+            Assert.Equal(expectedMessage, ex.Message);
         }
 
         [Fact]
@@ -398,8 +440,14 @@ namespace PDFPassRecovery.UnitTests
         {
             // Arrange
 
-            // Test encryption object from PDF1.6 file with no "/EncryptMetadata" entry
-            // "85 0 obj <</ CF <</ StdCF <</ AuthEvent / DocOpen / CFM / AESV2 / Length 16 >>>>/ Filter / Standard / Length 128 / O < DE31DCBCEBFED0F6CBC6D1B3ED41EB6A94195F5A4AA2BB1D69CDAA79B8962AC1 >/ P - 1060 / R 4 / StmF / StdCF / StrF / StdCF / U < E1144B1FAFCA41AA6EC6D09134179B0F00000000000000000000000000000000 >/ V 4 >> endobj";
+            /*
+             * Test encryption object from PDF1.6 file with no "/EncryptMetadata" entry
+             * 
+             * "85 0 obj <</ CF <</ StdCF <</ AuthEvent / DocOpen / CFM / AESV2 / Length 16 >>>>
+             * / Filter / Standard / Length 128 / O < DE31DCBCEBFED0F6CBC6D1B3ED41EB6A94195F5A4AA2BB1D69CDAA79B8962AC1 >
+             * / P - 1060 / R 4 / StmF / StdCF / StrF / StdCF / U < E1144B1FAFCA41AA6EC6D09134179B0F00000000000000000000000000000000 >
+             * / V 4 >> endobj";
+             */
             byte[] encryptionObject = { 0x38, 0x35, 0x20, 0x30, 0x20, 0x6F, 0x62, 0x6A, 0x0D, 0x0A, 0x3C, 0x3C, 0x2F, 0x43, 0x46, 0x3C,
                             0x3C, 0x2F, 0x53, 0x74, 0x64, 0x43, 0x46, 0x3C, 0x3C, 0x2F, 0x41, 0x75, 0x74, 0x68, 0x45, 0x76,
                             0x65, 0x6E, 0x74, 0x2F, 0x44, 0x6F, 0x63, 0x4F, 0x70, 0x65, 0x6E, 0x2F, 0x43, 0x46, 0x4D, 0x2F,
@@ -429,88 +477,113 @@ namespace PDFPassRecovery.UnitTests
         }
         #endregion
 
-        #region *************** Encryption Key Length Extraction Tests ***************
-
-        #endregion
-
         #region *************** Byte Array Entry Extraction Tests ***************
         [Fact]
         public void ExtractLiteralByteArray_NullInArray_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
 
         [Fact]
         public void ExtractLiteralByteArray_EmptyInArray_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
 
         [Fact]
         public void ExtractLiteralByteArray_NegativeStartPosition_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
 
         [Fact]
         public void ExtractLiteralByteArray_StartPositionGreaterThanInputLength_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
 
         [Fact]
         public void ExtractLiteralByteArray_NegativeOrZeroOutArraySize_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
 
         [Fact]
         // Extract a normal entry
         public void ExtractLiteralByteArray_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
 
         [Fact]
         // Extract an entry without the closing brace
         public void ExtractLiteralByteArray_WithoutClosingBrace_Test()
         {
-            throw new NotImplementedException();
-
             // Arrange
             // Act
             // Assert
+            throw new NotImplementedException();
         }
-
-
         #endregion
 
         #region *************** Numeric Entry Extraction Tests ***************
 
+        #endregion
+
+        #region *************** Encryption Key Length Extraction Tests ***************
+        [Fact]
+        public void PDF14_40bits_KeyLengthExtraction_Test()
+        {
+            // Arrange
+            // Act
+            // Assert
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void PDF14_128bits_KeyLengthExtraction_Test()
+        {
+            // Arrange
+            // Act
+            // Assert
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void PDF15_KeyLengthExtraction_WithCFSectionInTheBeginning_Test()
+        {
+            // Arrange
+            // Act
+            // Assert
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void PDF15_KeyLengthExtraction_WithCFSectionInTheMiddle_Test()
+        {
+            // Arrange
+            // Act
+            // Assert
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

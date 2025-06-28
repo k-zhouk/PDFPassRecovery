@@ -1,14 +1,15 @@
-﻿using BenchmarkDotNet.Columns;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Reports;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 
 namespace PDFPassRecovery.Benchmark
 {
     public class BruteForceFunctionsBenchmarks
     {
-        readonly PDFInitPassSettings passSettings = new PDFInitPassSettings("987654", 10, "0123456789");
+        const string passStart = "987654";
+        const int passLength = 10;
+        const string passAlphabet = "0123456789";
+        readonly PDFInitPassSettings passSettings = new PDFInitPassSettings(passStart, passLength, passAlphabet);
 
+        #region *************** SINGLE THREADED MANAGED BRUTE FORCE FUNCTIONS BENCHMARKS ***************
         [Benchmark]
         public void TestV1R2Performance()
         {
@@ -21,7 +22,7 @@ namespace PDFPassRecovery.Benchmark
                 UEntry = new byte[] { 0x3, 0xF9, 0x3B, 0x2F, 0x75, 0xD5, 0xD2, 0x2E, 0x6D, 0xFE, 0x7C, 0xDE, 0xAD, 0xB6, 0x1C, 0xEE, 0xF0, 0x57, 0x90, 0xE1, 0x0C, 0xfC, 0x2C, 0xfA, 0x28, 0xE1, 0x52, 0xEE, 0x3C, 0xC1, 0xCB, 0x8D },
                 V = 1
             };
-            (string password, long passwords) = PDFPassRecoverLib.BruteForceV1R2Password(v1r2PasswordData, passSettings);
+            (string password, long passwordsNum) = PDFPassRecoverLib.BruteForceV1R2Password(v1r2PasswordData, passSettings);
         }
 
         [Benchmark]
@@ -37,7 +38,7 @@ namespace PDFPassRecovery.Benchmark
                 V = 2,
                 KeyLength = 128
             };
-            (string password, long passwords) = PDFPassRecoverLib.BruteForceV2R3Password(v2r3PasswordData, passSettings);
+            (string password, long passwordsNum) = PDFPassRecoverLib.BruteForceV2R3Password(v2r3PasswordData, passSettings);
         }
 
         [Benchmark]
@@ -55,10 +56,28 @@ namespace PDFPassRecovery.Benchmark
                 KeyLength = 128,
                 EncryptMetadata = false
             };
-            (string password, long passwords) = PDFPassRecoverLib.BruteForceV2R3Password(v4r4PasswordData, passSettings);
+            (string password, long passwordsNum) = PDFPassRecoverLib.BruteForceV2R3Password(v4r4PasswordData, passSettings);
         }
+        #endregion
 
-        // Reporting section
+        #region *************** PHYSICAL CORES MANAGED BRUTE FORCE FUNCTIONS BENCHMARKS ***************
+        // TODO: To implement
+        #endregion
 
+        #region *************** LOGICAL CORES MANAGED BRUTE FORCE FUNCTIONS BENCHMARKS ***************
+        // TODO: To implement
+        #endregion
+
+        #region *************** SINGLE THREADED NATIVE BRUTE FORCE FUNCTIONS BENCHMARKS ***************
+        // TODO: To implement
+        #endregion
+
+        #region *************** PHYSICAL CORES NATIVE BRUTE FORCE FUNCTIONS BENCHMARKS ***************
+        // TODO: To implement
+        #endregion
+
+        #region *************** LOGICAL CORES NATIVE BRUTE FORCE FUNCTIONS BENCHMARKS ***************
+        // TODO: To implement
+        #endregion
     }
 }

@@ -25,7 +25,13 @@
       
     </UserSet>
   </Password>
+  
   <ReportingTimeSpan>
     10
   </ReportingTimeSpan>
+
+  <!-- Not in use for the time being. Possible values: numerical (1..), "All", "Physical" -->
+  <Cores>
+    
+  </Cores>
 </Config>

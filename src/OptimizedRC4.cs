@@ -5,7 +5,7 @@ namespace PDFPassRecovery
     /// <summary>
     /// Customized implementation of the RC4 algo to speed up the password recovery process
     /// Optimization 1: A shadow state array is initialized in the constructor and then copied for every initialization
-    /// Optimization 2: As the state array length is 256 bytes, the modulo operation is replaced with &0xFF operation
+    /// Optimization 2: As the state array length is 256 bytes, the modulo operation is replaced with &0xFF operation in some cases
     /// </summary>
     class OptimizedRC4
     {

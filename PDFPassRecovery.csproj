@@ -87,6 +87,7 @@
     <Compile Include="src\PDFPassConfigParser.cs" />
     <Compile Include="src\PDFPassRecoverLib.cs" />
     <Compile Include="PDFPassRecovery.cs" />
+    <Compile Include="src\PDFPassSystem.cs" />
     <Compile Include="src\PDFPasswordData.cs" />
     <Compile Include="src\PDFPassConfigs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

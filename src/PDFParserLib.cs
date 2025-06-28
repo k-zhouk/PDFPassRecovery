@@ -214,7 +214,13 @@ namespace PDFPassRecovery
         /// <returns>PDF15PasswordData object</returns>
         private static PDF15PasswordData ExtractPDF15EncryptionObjectData(byte[] encryptionObject)
         {
+            // TODO: This need to be fixed--> the extract of the key length cannot be carried over from the PDF 1.4 version
+            // The reason is that the encryption object in PDF 1.5 and PDF1.6 has the "/CF" dictionary that also has the "/Length" entry
+            // Conforming PDF can have the "/CF" dictionary anywhere in the encription object, so the encryption key can be before or after the "/CF" entry
+            // So the extraction ahouls be based on the PDF 1.2 and not 1.4
+
             PDF14PasswordData pdf14PasswordData = ExtractPDF14EncryptionObjectData(encryptionObject);
+
             PDF15PasswordData pdf15PasswordData = new PDF15PasswordData(pdf14PasswordData);
 
             if (TryGetBooleanEntryValue("/EncryptMetadata", encryptionObject, out bool entryValue))
@@ -334,7 +340,7 @@ namespace PDFPassRecovery
         {
             if (string.IsNullOrEmpty(entryName))
             {
-                throw new InvalidDataException($"The input string cannot be null or empty");
+                throw new InvalidDataException($"The entry name cannot be null or empty");
             }
 
             if ((inArray is null) || (inArray.Length == 0))
@@ -376,7 +382,7 @@ namespace PDFPassRecovery
                     entryValue = false;
                     return true;
                 default:
-                    throw new InvalidDataException($"The unknown value in the bool entry");
+                    throw new InvalidDataException($"The bool entry contains an unknown value");
             }
         }
 
