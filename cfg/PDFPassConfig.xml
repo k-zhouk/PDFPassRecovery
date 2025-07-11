@@ -2,7 +2,7 @@
 <!-- Application configuration file -->
 
 <Config>
-  <Password>
+  <PasswordSettings>
     <StartPassword>
       01234567
     </StartPassword>
@@ -24,7 +24,7 @@
     <UserSet use="no">
       
     </UserSet>
-  </Password>
+  </PasswordSettings>
   
   <ReportingTimeSpan>
     10

@@ -21,7 +21,7 @@
         public byte[] P { get; set; }
 
         // ID entry size is 16 bytes
-        public byte[] IdValue { get; set; }
+        public byte[] Id { get; set; }
     }
 
     /// <summary>
@@ -35,12 +35,12 @@
         // Copy constructor
         public PDF14PasswordData(BasePasswordData pdf12passwordData)
         {
-            V = pdf12passwordData.V;
-            R = pdf12passwordData.R;
-            OEntry = pdf12passwordData.OEntry;
-            UEntry = pdf12passwordData.UEntry;
-            P = pdf12passwordData.P;
-            IdValue = pdf12passwordData.IdValue;
+            this.V = pdf12passwordData.V;
+            this.R = pdf12passwordData.R;
+            this.OEntry = pdf12passwordData.OEntry;
+            this.UEntry = pdf12passwordData.UEntry;
+            this.P = pdf12passwordData.P;
+            this.Id = pdf12passwordData.Id;
         }
 
         // Length of the encryption key
@@ -52,12 +52,8 @@
         // Default constructor
         public PDF15PasswordData() { }
 
-        //TODO: This need to be fixed--> inheritance should be from BasePasswordData, as the key length is extracted differently in PDF 1.4 and PDF 1.5
         // Copy constructor
-        public PDF15PasswordData(PDF14PasswordData pdf14passwordData) : base(pdf14passwordData)
-        {
-            KeyLength = pdf14passwordData.KeyLength;
-        }
+        public PDF15PasswordData(PDF14PasswordData pdf14passwordData) : base(pdf14passwordData) { }
 
         // Option to encrypt the metadata or not
         public bool EncryptMetadata { get; set; }

@@ -25,13 +25,13 @@ namespace PDFPassRecovery.UnitTests
             PDFFileContent fileContent3 = new PDFFileContent(testID3, null);
 
             // Act
-            byte[] array1 = PDFParserLib.ExtractIDValue(fileContent1);
+            byte[] array1 = PDFParserLib.ExtractFileID(fileContent1);
             string arrayString1 = BitConverter.ToString(array1);
 
-            byte[] array2 = PDFParserLib.ExtractIDValue(fileContent2);
+            byte[] array2 = PDFParserLib.ExtractFileID(fileContent2);
             string arrayString2 = BitConverter.ToString(array2);
 
-            byte[] array3 = PDFParserLib.ExtractIDValue(fileContent3);
+            byte[] array3 = PDFParserLib.ExtractFileID(fileContent3);
             string arrayString3 = BitConverter.ToString(array3);
 
             // Assert--> array 1
@@ -59,7 +59,7 @@ namespace PDFPassRecovery.UnitTests
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
             // Act
-            byte[] array1 = PDFParserLib.ExtractIDValue(fileContent);
+            byte[] array1 = PDFParserLib.ExtractFileID(fileContent);
             string arrayString1 = BitConverter.ToString(array1);
 
             // Assert
@@ -79,7 +79,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractFileID(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -95,7 +95,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractFileID(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -111,7 +111,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractFileID(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -123,7 +123,7 @@ namespace PDFPassRecovery.UnitTests
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
             // Act
-            byte[] array = PDFParserLib.ExtractIDValue(fileContent);
+            byte[] array = PDFParserLib.ExtractFileID(fileContent);
             string arrayString = BitConverter.ToString(array);
 
             // Assert
@@ -144,7 +144,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractFileID(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -160,7 +160,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractFileID(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -172,7 +172,7 @@ namespace PDFPassRecovery.UnitTests
             PDFFileContent fileContent = new PDFFileContent(testID, null);
 
             // Act
-            byte[] array = PDFParserLib.ExtractIDValue(fileContent);
+            byte[] array = PDFParserLib.ExtractFileID(fileContent);
             string arrayString = BitConverter.ToString(array);
 
             // Assert
@@ -193,7 +193,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractIDValue(fileContent));
+            InvalidDataException ex = Assert.Throws<InvalidDataException>(() => PDFParserLib.ExtractFileID(fileContent));
             Assert.Equal(expectedMessage, ex.Message);
         }
         #endregion

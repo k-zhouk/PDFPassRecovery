@@ -53,21 +53,10 @@ namespace PDFPassRecovery
                     {
                         throw new NotImplementedException();
                     }
-                    // Use logical CPU cores
-                    if (option == "-l")
-                    {
-                        throw new NotImplementedException();
-                    }
-                    // Use physical CPU cores only
-                    if (option == "-p")
-                    {
-                        throw new NotImplementedException();
-                    }
-                    break;
                     */
 
                 default:
-                    PDFPassRecoverLib.PrintColoredText("Too many arguments have been provided", ConsoleColor.Red);
+                    PDFPassRecoverLib.PrintFatal($"Too many arguments have been provided!");
                     PDFPassRecoverLib.PrintHelp();
                     Environment.Exit(0);
                     break;
@@ -85,14 +74,12 @@ namespace PDFPassRecovery
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintColoredText($"{Environment.NewLine}Error parsing configuration file: {ex.Message}", ConsoleColor.Red);
+                PDFPassRecoverLib.PrintFatal($"{Environment.NewLine}Error parsing configuration file: {ex.Message}");
                 Environment.Exit(0);
             }
-            PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
+            PDFPassRecoverLib.PrintInfo($"OK");
 
-            /****************************************
-             Main body
-             ****************************************/
+            /**************************************** MAIN BODY ****************************************/
             Console.Write($"Checking the file...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
 
             Console.WriteLine(Environment.NewLine);
@@ -100,23 +87,24 @@ namespace PDFPassRecovery
             string fileExtension = Path.GetExtension(fullFileName).ToUpper();
             if (fileExtension != ".PDF")
             {
-                PDFPassRecoverLib.PrintColoredText($"File extension must be \"PDF\"", ConsoleColor.Red);
+                PDFPassRecoverLib.PrintFatal($"File extension must be \"PDF\"");
                 Environment.Exit(0);
             }
-            PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
+            PDFPassRecoverLib.PrintInfo($"OK");
 
             long fileSize = fi.Length;
-            Console.WriteLine("File size:".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR) + $"{fileSize} (bytes)");
+            Console.Write("File size:".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            PDFPassRecoverLib.PrintInfo($"{fileSize} (bytes)");
 
             PDFFileContent pdfFileContent = null;
             Console.Write("Reading the file content...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
             try
             {
-                pdfFileContent = PDFParserLib.GetPDFFileConent(fullFileName);
+                pdfFileContent = PDFParserLib.GetPDFFileContent(fullFileName);
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintColoredText($"Error happened while file reading: {ex.Message}", ConsoleColor.Red);
+                PDFPassRecoverLib.PrintFatal($"Error happened while file reading: {ex.Message}");
                 Environment.Exit(0);
             }
             PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
@@ -129,7 +117,17 @@ namespace PDFPassRecovery
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintColoredText($"{ex.Message}", ConsoleColor.Red);
+                PDFPassRecoverLib.PrintFatal($"{ex.Message}");
+                Environment.Exit(0);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+
+            byte[] encryptionObject = PDFParserLib.ExtractEncryptionObject(pdfFileContent);
+            if (encryptionObject is null)
+            {
+                PDFPassRecoverLib.PrintFatal($"The extraction of password related data failed!");
                 Environment.Exit(0);
             }
 
@@ -140,7 +138,7 @@ namespace PDFPassRecovery
             switch (pdfVersion)
             {
                 case "":
-                    PDFPassRecoverLib.PrintColoredText("The version of the PDF format is missing", ConsoleColor.Red);
+                    PDFPassRecoverLib.PrintFatal($"The version of the PDF format is missing");
                     Environment.Exit(0);
                     break;
 
@@ -149,7 +147,7 @@ namespace PDFPassRecovery
                     Console.WriteLine();
                     Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
                     BasePasswordData pdf13PasswordData = PDFParserLib.ExtractPDF12PasswordData(pdfFileContent);
-                    PDFPassRecoverLib.PrintColoredText("Done", ConsoleColor.Green);
+                    PDFPassRecoverLib.PrintInfo($"Done");
 
                     PDFPassRecoverLib.RestorePDF12EncryptedPassword(pdf13PasswordData, passwordSettings);
                     Environment.Exit(0);

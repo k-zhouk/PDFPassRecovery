@@ -192,10 +192,10 @@ namespace PDFPassRecovery
             byte[] rc4outBuffer = new byte[PADDING_STRING.Length];
 
             // Pre-filling the constant data into the array used to calculate the MD5 hash
-            byte[] fullInputForMd5Hash = new byte[PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.IdValue.Length];
+            byte[] fullInputForMd5Hash = new byte[PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.Id.Length];
             Buffer.BlockCopy(passwordData.OEntry, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH, passwordData.OEntry.Length);
             Buffer.BlockCopy(passwordData.P, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length, passwordData.P.Length);
-            Buffer.BlockCopy(passwordData.IdValue, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.IdValue.Length);
+            Buffer.BlockCopy(passwordData.Id, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.Id.Length);
 
             long passwordsCounter = 1;
 
@@ -252,15 +252,15 @@ namespace PDFPassRecovery
             byte[] newMD5Hash;
 
             // Pre-filling the constant data into the array used to calculate the MD5 hash
-            byte[] fullInputForMd5Hash = new byte[PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.IdValue.Length];
+            byte[] fullInputForMd5Hash = new byte[PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.Id.Length];
             Buffer.BlockCopy(passwordData.OEntry, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH, passwordData.OEntry.Length);
             Buffer.BlockCopy(passwordData.P, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length, passwordData.P.Length);
-            Buffer.BlockCopy(passwordData.IdValue, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.IdValue.Length);
+            Buffer.BlockCopy(passwordData.Id, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.Id.Length);
 
             // Step 2 from Algorigthm 3.5
             MD5 md35 = MD5.Create();
             md35.TransformBlock(PADDING_STRING, 0, PADDING_STRING.Length, null, 0);
-            md35.TransformFinalBlock(passwordData.IdValue, 0, passwordData.IdValue.Length);
+            md35.TransformFinalBlock(passwordData.Id, 0, passwordData.Id.Length);
 
             // Passwords counter
             long passwordsCounter = 1;
@@ -335,21 +335,21 @@ namespace PDFPassRecovery
             byte[] newMD5Hash;
 
             // Pre-filling the constant data into the array used to calculate the MD5 hash
-            byte[] fullInputForMd5Hash = new byte[PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.IdValue.Length];
+            byte[] fullInputForMd5Hash = new byte[PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.Id.Length];
             Buffer.BlockCopy(passwordData.OEntry, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH, passwordData.OEntry.Length);
             Buffer.BlockCopy(passwordData.P, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length, passwordData.P.Length);
-            Buffer.BlockCopy(passwordData.IdValue, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.IdValue.Length);
+            Buffer.BlockCopy(passwordData.Id, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.Id.Length);
 
             if (passwordData.EncryptMetadata == false)
             {
                 Array.Resize(ref fullInputForMd5Hash, fullInputForMd5Hash.Length + 4);
-                Buffer.BlockCopy(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.IdValue.Length, 4);
+                Buffer.BlockCopy(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length + passwordData.Id.Length, 4);
             }
 
             // Step 2 from Algorigthm 3.5
             MD5 md35 = MD5.Create();
             md35.TransformBlock(PADDING_STRING, 0, PADDING_STRING.Length, null, 0);
-            md35.TransformFinalBlock(passwordData.IdValue, 0, passwordData.IdValue.Length);
+            md35.TransformFinalBlock(passwordData.Id, 0, passwordData.Id.Length);
 
             // Passwords counter
             long passwordsCounter = 1;

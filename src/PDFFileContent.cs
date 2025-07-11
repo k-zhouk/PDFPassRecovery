@@ -9,7 +9,7 @@
         public string AsString { get; }
         public byte[] AsByteArray { get; }
 
-        // Constructor
+        // Parameter constructor
         public PDFFileContent(string inputString, byte[] inputByteArray)
         {
             AsString = inputString;
