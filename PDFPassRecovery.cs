@@ -43,18 +43,6 @@ namespace PDFPassRecovery
                     }
                     break;
 
-                /* Draft for the future implementations
-                 * Commented out for the time being
-                case 2:
-                    string option = args[1];
-
-                    // "-r" for restart of the previous password restore session
-                    if (option == "-r")
-                    {
-                        throw new NotImplementedException();
-                    }
-                    */
-
                 default:
                     PDFPassRecoverLib.PrintFatal($"Too many arguments have been provided!");
                     PDFPassRecoverLib.PrintHelp();
@@ -118,16 +106,6 @@ namespace PDFPassRecovery
             catch (Exception ex)
             {
                 PDFPassRecoverLib.PrintFatal($"{ex.Message}");
-                Environment.Exit(0);
-            }
-
-            Console.WriteLine();
-            Console.WriteLine($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
-
-            byte[] encryptionObject = PDFParserLib.ExtractEncryptionObject(pdfFileContent);
-            if (encryptionObject is null)
-            {
-                PDFPassRecoverLib.PrintFatal($"The extraction of password related data failed!");
                 Environment.Exit(0);
             }
 
