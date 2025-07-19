@@ -112,6 +112,7 @@ namespace PDFPassRecovery
             Console.Write("Checking PDF version...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
             string pdfVersion = PDFParserLib.GetPDFVersion(pdfFileContent.AsString);
             Console.Write($"{pdfVersion}");
+            Console.WriteLine();
 
             switch (pdfVersion)
             {
@@ -122,7 +123,6 @@ namespace PDFPassRecovery
 
                 case "1.2":
                 case "1.3":
-                    Console.WriteLine();
                     Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
                     BasePasswordData pdf13PasswordData = PDFParserLib.ExtractPDF12PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintInfo($"Done");
@@ -132,7 +132,6 @@ namespace PDFPassRecovery
                     break;
 
                 case "1.4":
-                    Console.WriteLine();
                     Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
                     PDF14PasswordData pdf14PasswordData = PDFParserLib.ExtractPDF14PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintColoredText("Done", ConsoleColor.Green);
@@ -143,17 +142,20 @@ namespace PDFPassRecovery
 
                 case "1.5":
                 case "1.6":
-                    Console.WriteLine();
                     Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
-                    PDF15PasswordData pdf16PasswordData = PDFParserLib.ExtractPDF15PasswordData(pdfFileContent);
+                    PDF15PasswordData pdf15PasswordData = PDFParserLib.ExtractPDF15PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintColoredText("Done", ConsoleColor.Green);
 
-                    PDFPassRecoverLib.RestorePDF15Password(pdf16PasswordData, passwordSettings);
+                    PDFPassRecoverLib.RestorePDF15Password(pdf15PasswordData, passwordSettings);
                     Environment.Exit(0);
                     break;
 
                 case "1.7":
-                    Console.WriteLine($"{pdfVersion}");
+                    /*
+                    Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+                    PDF17PasswordData pdf17PasswordData= PDFParserLib.ExtractPDF17PasswordData(pdfFileContent);
+                    PDFPassRecoverLib.PrintColoredText("Done", ConsoleColor.Green);
+                    */
                     PDFPassRecoverLib.PrintColoredText("The version 1.7 is not yet supported", ConsoleColor.Red);
                     Environment.Exit(0);
                     break;
@@ -165,7 +167,7 @@ namespace PDFPassRecovery
                     break;
 
                 default:
-                    PDFPassRecoverLib.PrintColoredText("Unknown version of the PDF format", ConsoleColor.Red);
+                    PDFPassRecoverLib.PrintColoredText("Unknown version of the PDF version", ConsoleColor.Red);
                     Environment.Exit(0);
                     break;
             }

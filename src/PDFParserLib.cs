@@ -150,21 +150,17 @@ namespace PDFPassRecovery
 
         public static BasePasswordData ExtractPDF12PasswordData(PDFFileContent fileContent)
         {
-            const int O_ENTRY_SIZE = 32;
-            const int U_ENTRY_SIZE = 32;
-
             byte[] encryptionArray = ExtractEncryptionObject(fileContent).AsBytes;
 
             int pValue = GetNumericalEntry("/P", encryptionArray);
 
-            BasePasswordData pdf12PasswordData = new BasePasswordData()
+            BasePasswordData pdf12PasswordData = new BasePasswordData
             {
-                OEntry = GetArrayEntry("/O", encryptionArray, O_ENTRY_SIZE),
-                UEntry = GetArrayEntry("/U", encryptionArray, U_ENTRY_SIZE),
+                OEntry = GetArrayEntry("/O", encryptionArray, BasePasswordData.OEntrySize),
+                UEntry = GetArrayEntry("/U", encryptionArray, BasePasswordData.UEntrySize),
                 P = BitConverter.GetBytes(pValue),
                 R = GetNumericalEntry("/R", encryptionArray),
                 V = GetNumericalEntry("/V", encryptionArray),
-
                 Id = ExtractFileID(fileContent)
             };
 
@@ -177,52 +173,38 @@ namespace PDFPassRecovery
         /// <returns>PDFPasswordData object</returns>
         public static PDF14PasswordData ExtractPDF14PasswordData(PDFFileContent fileContent)
         {
-            const int O_ENTRY_SIZE = 32;
-            const int U_ENTRY_SIZE = 32;
-
             byte[] encryptionArray = ExtractEncryptionObject(fileContent).AsBytes;
 
             int pValue = GetNumericalEntry("/P", encryptionArray);
 
             PDF14PasswordData pdf14PasswordData = new PDF14PasswordData()
             {
-                OEntry = GetArrayEntry("/O", encryptionArray, O_ENTRY_SIZE),
-                UEntry = GetArrayEntry("/U", encryptionArray, U_ENTRY_SIZE),
+                OEntry = GetArrayEntry("/O", encryptionArray, PDF14PasswordData.OEntrySize),
+                UEntry = GetArrayEntry("/U", encryptionArray, PDF14PasswordData.UEntrySize),
                 P = BitConverter.GetBytes(pValue),
                 R = GetNumericalEntry("/R", encryptionArray),
                 V = GetNumericalEntry("/V", encryptionArray),
+                KeyLength = GetNumericalEntry("/Length", encryptionArray),
 
                 Id = ExtractFileID(fileContent)
             };
-
-            pdf14PasswordData.KeyLength = GetNumericalEntry("/Length", encryptionArray);
 
             return pdf14PasswordData;
         }
 
         public static PDF15PasswordData ExtractPDF15PasswordData(PDFFileContent fileContent)
         {
-            const int O_ENTRY_SIZE = 32;
-            const int U_ENTRY_SIZE = 32;
-
             PDFEncryptionObject encryptionObject = ExtractEncryptionObject(fileContent);
-            PDFEncryptionObject trimmedEncryptionObject = TrimCFDictionary(encryptionObject);
 
-            byte[] trimmedEncryptionArray = TrimCFDictionary(encryptionObject).AsBytes;
+            // The CF dictionary is optional, so it might not present in the encryption object
+            if (GetStringIndexInArray("/CF", encryptionObject.AsBytes) != -1)
+            {
+                encryptionObject = TrimCFDictionary(encryptionObject);
+            }
+
+            byte[] trimmedEncryptionArray = encryptionObject.AsBytes;
 
             int pValue = GetNumericalEntry("/P", trimmedEncryptionArray);
-
-            PDF15PasswordData pdf15PasswordData = new PDF15PasswordData()
-            {
-                OEntry = GetArrayEntry("/O", trimmedEncryptionArray, O_ENTRY_SIZE),
-                UEntry = GetArrayEntry("/U", trimmedEncryptionArray, U_ENTRY_SIZE),
-                P = BitConverter.GetBytes(pValue),
-                R = GetNumericalEntry("/R", trimmedEncryptionArray),
-                V = GetNumericalEntry("/V", trimmedEncryptionArray),
-                KeyLength = GetNumericalEntry("/Length", trimmedEncryptionArray),
-
-                Id = ExtractFileID(fileContent)
-            };
 
             bool encryptMetadata;
             if (TryGetBooleanEntryValue("/EncryptMetadata", trimmedEncryptionArray, out bool entryValue))
@@ -234,9 +216,57 @@ namespace PDFPassRecovery
                 encryptMetadata = false;
             }
 
-            pdf15PasswordData.EncryptMetadata = encryptMetadata;
+            PDF15PasswordData pdf15PasswordData = new PDF15PasswordData()
+            {
+                OEntry = GetArrayEntry("/O", trimmedEncryptionArray, PDF15PasswordData.OEntrySize),
+                UEntry = GetArrayEntry("/U", trimmedEncryptionArray, PDF15PasswordData.UEntrySize),
+                P = BitConverter.GetBytes(pValue),
+                R = GetNumericalEntry("/R", trimmedEncryptionArray),
+                V = GetNumericalEntry("/V", trimmedEncryptionArray),
+                KeyLength = GetNumericalEntry("/Length", trimmedEncryptionArray),
+                EncryptMetadata = encryptMetadata,
+
+                Id = ExtractFileID(fileContent)
+            };
 
             return pdf15PasswordData;
+        }
+
+        public static PDF17PasswordData ExtractPDF17PasswordData(PDFFileContent fileContent)
+        {
+            PDFEncryptionObject encryptionObject = ExtractEncryptionObject(fileContent);
+            PDFEncryptionObject trimmedEncryptionObject = TrimCFDictionary(encryptionObject);
+
+            byte[] trimmedEncryptionArray = TrimCFDictionary(encryptionObject).AsBytes;
+
+            int pValue = GetNumericalEntry("/P", trimmedEncryptionArray);
+
+            bool encryptMetadata;
+            if (TryGetBooleanEntryValue("/EncryptMetadata", trimmedEncryptionArray, out bool entryValue))
+            {
+                encryptMetadata = entryValue;
+            }
+            else
+            {
+                encryptMetadata = false;
+            }
+
+            PDF17PasswordData pdf17PasswordData = new PDF17PasswordData()
+            {
+                OEntry = GetArrayEntry("/O", trimmedEncryptionArray, PDF17PasswordData.OEntrySize),
+                
+                P = BitConverter.GetBytes(pValue),
+                R = GetNumericalEntry("/R", trimmedEncryptionArray),
+                V = GetNumericalEntry("/V", trimmedEncryptionArray),
+                KeyLength = GetNumericalEntry("/Length", trimmedEncryptionArray),
+                EncryptMetadata = encryptMetadata,
+                UEntry = GetArrayEntry("/U", trimmedEncryptionArray, PDF17PasswordData.UEntrySize),
+                UEEntry = GetArrayEntry("/UE", trimmedEncryptionArray, PDF17PasswordData.UEEntrySize),
+
+                Id = ExtractFileID(fileContent)
+            };
+
+            return pdf17PasswordData;
         }
 
         /// <summary>
@@ -248,7 +278,7 @@ namespace PDFPassRecovery
         public static PDFEncryptionObject TrimCFDictionary(PDFEncryptionObject encryptionObject)
         {
             // Pattern to find the "/CF" dictionary in the encryption object
-            string cfDicPattern = @"/CF.*?<<.*?>>.*?>>";
+            string cfDicPattern = @"<<.*?/CF.*?<<.*?>>.*?>>";
             Regex cfDicRegex = new Regex(cfDicPattern, RegexOptions.Singleline);
             Match regexMatch = cfDicRegex.Match(encryptionObject.AsString);
 
@@ -261,12 +291,12 @@ namespace PDFPassRecovery
             byte[] trimmedEncryptionArray = new byte[trimmedArraySize];
             Buffer.BlockCopy(encryptionObject.AsBytes, 0, trimmedEncryptionArray, 0, regexMatch.Index);
 
-            int srcOffset = regexMatch.Index+ regexMatch.Length;
+            int srcOffset = regexMatch.Index + regexMatch.Length;
             int dstOffset = regexMatch.Index;
             int byteCount = encryptionObject.Size - srcOffset;
             Buffer.BlockCopy(encryptionObject.AsBytes, srcOffset, trimmedEncryptionArray, dstOffset, byteCount);
 
-            string trimmedEncryptionString= encryptionObject.AsString.Remove(regexMatch.Index, regexMatch.Length);
+            string trimmedEncryptionString = encryptionObject.AsString.Remove(regexMatch.Index, regexMatch.Length);
 
             PDFEncryptionObject trimmedEncryptionObject = new PDFEncryptionObject
             {
@@ -301,19 +331,24 @@ namespace PDFPassRecovery
             Regex encryptionObjRegex = new Regex(encryptionObjPattern, RegexOptions.Singleline);
             regexMatch = encryptionObjRegex.Match(fileContent.AsString);
 
-            if (!regexMatch.Success) {
+            if (!regexMatch.Success)
+            {
                 throw new InvalidDataException($"The exraction of the encryption object failed!");
             }
+
+            byte[] encryptionObjectAsBytes = new byte[regexMatch.Length];
+            Buffer.BlockCopy(fileContent.AsBytes, regexMatch.Index, encryptionObjectAsBytes, 0, regexMatch.Length);
 
             PDFEncryptionObject encryptionObject = new PDFEncryptionObject
             {
                 AsString = regexMatch.Value,
-                AsBytes= Encoding.ASCII.GetBytes(regexMatch.Value),
+                AsBytes = encryptionObjectAsBytes,
                 Index = regexMatch.Index,
-                Size= regexMatch.Length,
-                Trimmed= false,
-                TrimmedSection= string.Empty
+                Size = regexMatch.Length,
+                Trimmed = false,
+                TrimmedSection = string.Empty
             };
+
 
             return encryptionObject;
         }
@@ -552,75 +587,85 @@ namespace PDFPassRecovery
 
             byte[] outArray = new byte[outArraySize];
 
-            int i = 0;          // Counter to track 
             int inCnt = 0;      // Counter to navigate in the input array
             int outCnt = 0;     // Counter to navigate in the output array
-            while ((startPosition + i) < inArray.Length)
+
+            //TODO: fix me
+
+            while (outCnt < outArraySize)
             {
-                if (inArray[startPosition + inCnt] == ')')
+                /*
+                 * If the reverse solidus is followed by one of the following characters, then the combination should be treated specially
+                 * In general, we don't know how many such conbinations can be in a literal string
+                 */
+                if (inArray[startPosition + inCnt] == '\\')
                 {
-                    return outArray;
-                }
+                    switch (inArray[startPosition + inCnt + 1])
+                    {
+                        case (byte)'n':
+                            {
+                                outArray[outCnt] = 0x0A;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        case (byte)'r':
+                            {
+                                outArray[outCnt] = 0x0D;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        case (byte)'t':
+                            {
+                                outArray[outCnt] = 0x09;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
 
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'n'))
-                {
-                    outArray[outCnt] = 0x0A;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'r'))
-                {
-                    outArray[outCnt] = 0x0D;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 't'))
-                {
-                    outArray[outCnt] = 0x09;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'b'))
-                {
-                    outArray[outCnt] = 0x08;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == 'f'))
-                {
-                    outArray[outCnt] = 0x0C;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == '\\'))
-                {
-                    outArray[outCnt] = 0x5C;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == '('))
-                {
-                    outArray[outCnt] = 0x28;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
-                }
-                if ((inArray[startPosition + inCnt] == '\\') && (inArray[startPosition + inCnt + 1] == ')'))
-                {
-                    outArray[outCnt] = 0x29;
-                    inCnt += 2;
-                    outCnt++;
-                    continue;
+                        case (byte)'b':
+                            {
+                                outArray[outCnt] = 0x08;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        case (byte)'f':
+                            {
+                                outArray[outCnt] = 0x0C;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        case (byte)'\\':
+                            {
+                                outArray[outCnt] = 0x5C;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        case (byte)'(':
+                            {
+                                outArray[outCnt] = 0x28;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        case (byte)')':
+                            {
+                                outArray[outCnt] = 0x29;
+                                inCnt += 2;
+                                outCnt++;
+                                continue;
+                            }
+                        // If the reverse solidus is not followed by the following characters from above, it shall be ignored
+                        default:
+                            {
+                                inCnt++;
+                                break;
+                            }
+                    }
                 }
 
                 outArray[outCnt] = inArray[startPosition + inCnt];
@@ -628,7 +673,7 @@ namespace PDFPassRecovery
                 outCnt++;
             }
 
-            throw new InvalidDataException($"The input literal array doesn't contain the closing parenthese");
+            return outArray;
         }
 
         /// <summary>

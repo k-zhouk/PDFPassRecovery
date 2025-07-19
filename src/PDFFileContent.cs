@@ -7,13 +7,13 @@
     {
         // Both setters are private in order protect the content stored from accident modification
         public string AsString { get; }
-        public byte[] AsByteArray { get; }
+        public byte[] AsBytes { get; }
 
         // Parameter constructor
         public PDFFileContent(string inputString, byte[] inputByteArray)
         {
             AsString = inputString;
-            AsByteArray = inputByteArray;
+            AsBytes = inputByteArray;
         }
     }
 }
