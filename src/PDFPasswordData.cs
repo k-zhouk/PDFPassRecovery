@@ -89,11 +89,9 @@
     /// <summary>
     /// Class stores the password related data extarcted from a PDF 1.7~ PDF 2.0 file
     /// </summary>
-    public class PDF17PasswordData
+    public class PDF17PasswordData : PDF15PasswordData
     {
-        public int V { get; set; }
-
-        public int R { get; set; }
+        // TODO: fix me
 
         // O-entry size for PDF 1.7 is 48 bytes
         public static int OEntrySize { get => 48; }
@@ -113,18 +111,6 @@
             set => _UEntry = value;
         }
 
-        public static int PEntrySize { get => 4; }
-        private byte[] _P = new byte[PEntrySize];
-        public byte[] P
-        {
-            get => _P;
-            set => _P = value;
-        }
-
-        public int KeyLength { get; set; }
-
-        public bool EncryptMetadata { get; set; }
-
         // UE-entry size for PDF 1.7 is 32 bytes
         public static int UEEntrySize { get => 32; }
         private byte[] _UEEntry = new byte[UEEntrySize];
@@ -134,13 +120,20 @@
             set => _UEEntry = value;
         }
 
-        // ID entry size is 16 bytes
-        public static int IdEntrySize { get => 16; }
-        private byte[] _Id = new byte[IdEntrySize];
-        public byte[] Id
+        public static int SaltSize { get => 8; }
+
+        private byte[] _ValidationSalt = new byte[SaltSize];
+        public byte[] ValidationSalt
         {
-            get => _Id;
-            set => _Id = value;
+            get => _ValidationSalt;
+            set => _ValidationSalt = value;
+        }
+
+        private byte[] _KeySalt = new byte[SaltSize];
+        public byte[] KeySalt
+        {
+            get => _KeySalt;
+            set => _KeySalt = value;
         }
     }
 }

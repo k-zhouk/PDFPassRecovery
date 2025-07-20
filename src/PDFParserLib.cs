@@ -251,16 +251,22 @@ namespace PDFPassRecovery
                 encryptMetadata = false;
             }
 
+            byte[] tempUEntry = GetArrayEntry("/U", trimmedEncryptionArray, PDF17PasswordData.UEntrySize);
+
+            byte[] tempValidationSalt = new byte[PDF17PasswordData.SaltSize];
+            Buffer.BlockCopy(tempUEntry, BasePasswordData.OEntrySize, tempValidationSalt, 0, PDF17PasswordData.SaltSize);
+
+
             PDF17PasswordData pdf17PasswordData = new PDF17PasswordData()
             {
                 OEntry = GetArrayEntry("/O", trimmedEncryptionArray, PDF17PasswordData.OEntrySize),
-                
+                UEntry = tempUEntry,
+                ValidationSalt = tempValidationSalt,
                 P = BitConverter.GetBytes(pValue),
                 R = GetNumericalEntry("/R", trimmedEncryptionArray),
                 V = GetNumericalEntry("/V", trimmedEncryptionArray),
                 KeyLength = GetNumericalEntry("/Length", trimmedEncryptionArray),
                 EncryptMetadata = encryptMetadata,
-                UEntry = GetArrayEntry("/U", trimmedEncryptionArray, PDF17PasswordData.UEntrySize),
                 UEEntry = GetArrayEntry("/UE", trimmedEncryptionArray, PDF17PasswordData.UEEntrySize),
 
                 Id = ExtractFileID(fileContent)
@@ -589,8 +595,6 @@ namespace PDFPassRecovery
 
             int inCnt = 0;      // Counter to navigate in the input array
             int outCnt = 0;     // Counter to navigate in the output array
-
-            //TODO: fix me
 
             while (outCnt < outArraySize)
             {
