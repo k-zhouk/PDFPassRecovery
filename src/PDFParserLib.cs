@@ -21,7 +21,7 @@ namespace PDFPassRecovery
                 throw new ArgumentNullException("The file content cannot be null or empty");
             }
 
-            Console.Write("Checking the presense of the standard header...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write("Checking the presense of the standard header...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             // 1st check of the valid PDF- whether the "%PDF" string presents in the file
             if (!IsPDFFileHeaderPresent(fileContent))
             {
@@ -29,7 +29,7 @@ namespace PDFPassRecovery
             }
             PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
 
-            Console.Write("Checking the presense of the standard trailer...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write("Checking the presense of the standard trailer...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             // 2nd check of the valid PDF- whether the "%%EOF" string is in the end of the file
             if (!IsPDFFileTrailerPresent(fileContent))
             {
@@ -37,7 +37,7 @@ namespace PDFPassRecovery
             }
             PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
 
-            Console.Write("Checking if the file is encrypted...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write("Checking if the file is encrypted...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             if (!IsEncryptionObjectPresent(fileContent))
             {
                 throw new InvalidDataException("The PDF file is not encrypted");
@@ -256,7 +256,6 @@ namespace PDFPassRecovery
             byte[] tempValidationSalt = new byte[PDF17PasswordData.SaltSize];
             Buffer.BlockCopy(tempUEntry, BasePasswordData.OEntrySize, tempValidationSalt, 0, PDF17PasswordData.SaltSize);
 
-
             PDF17PasswordData pdf17PasswordData = new PDF17PasswordData()
             {
                 OEntry = GetArrayEntry("/O", trimmedEncryptionArray, PDF17PasswordData.OEntrySize),
@@ -325,7 +324,7 @@ namespace PDFPassRecovery
         private static PDFEncryptionObject ExtractEncryptionObject(PDFFileContent fileContent)
         {
             // Pattern to find the encryption section in the PDF file
-            string encrytionObjRefPattern = @"/Encrypt.*?R";
+            string encrytionObjRefPattern = @"/Encrypt\b.*?R";
             Regex encryptionObjRefRegex = new Regex(encrytionObjRefPattern, RegexOptions.Singleline);
             Match regexMatch = encryptionObjRefRegex.Match(fileContent.AsString);
 
@@ -354,7 +353,6 @@ namespace PDFPassRecovery
                 Trimmed = false,
                 TrimmedSection = string.Empty
             };
-
 
             return encryptionObject;
         }

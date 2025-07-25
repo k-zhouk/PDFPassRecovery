@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Numerics;
 using System.Diagnostics;
 using System.Globalization;
 using System.Collections.Generic;
@@ -10,16 +11,13 @@ namespace PDFPassRecovery
 {
     public static class PDFPassRecoverLib
     {
-        public const int PADDING_OFFSET = 55;
-        public const char PADDING_CHAR = ' ';
-
         /// <summary>
-        /// Function generates a padded password based on the parameters provided- password length, alphabet and start string
+        /// Method generates a padded password per PDF 1.2~ PDF 1.6 specs based on the parameters provided- password length, alphabet and start string
         /// </summary>
         /// <param name="passwordLength">Length of the password to generate</param>
         /// <param name="alphabet">Alphabet (symbols) to use for password generation</param>
         /// <param name="startPassword">A string to start with</param>
-        /// <returns>IEnumerable interface for a byte array</returns>
+        /// <returns>IEnumerable collection for a byte array</returns>
         /// <exception cref="ArgumentNullException">Exception is thrown, if the string to strat with is null</exception>
         /// <exception cref="ArgumentException">Exception is thrown, if the string to start with is longer, then the password length</exception>
         public static IEnumerable<byte[]> GeneratePaddedPassword(int passwordLength, string alphabet, string startPassword)
@@ -78,10 +76,15 @@ namespace PDFPassRecovery
             }
         }
 
+        /// <summary>
+        /// Method generates a padded password per PDF 1.7 specs based on the parameters provided- password length, alphabet and start string
+        /// </summary>
+        /// <param name="passwordLength">Length of the password to generate</param>
+        /// <param name="alphabet">Alphabet (symbols) to use for password generation</param>
+        /// <param name="startPassword">A string to start with</param>
+        /// <returns>IEnumerable collection for a byte array</returns>
         public static IEnumerable<byte[]> GeneratePasswordAsBytes(int passwordLength, string alphabet, string startPassword)
         {
-            // TODO: fix me
-
             // Length of the password and the input alphabet
             int k = passwordLength - startPassword.Length;
             int n = alphabet.Length;
@@ -104,7 +107,7 @@ namespace PDFPassRecovery
             while (true)
             {
                 Buffer.BlockCopy(permutations, 0, fullPassword, startPasswordAsBytes.Length, permutations.Length);
-                
+
                 yield return fullPassword;
 
                 int i = k - 1;
@@ -131,6 +134,14 @@ namespace PDFPassRecovery
             }
         }
 
+        /// <summary>
+        /// Method measures the password restore function execution time
+        /// </summary>
+        /// <typeparam name="T">Generic parameter for a password data class and its childs</typeparam>
+        /// <param name="bruteForceFunction">Delegate for the brute force function</param>
+        /// <param name="passwordData">BasePasswordData object</param>
+        /// <param name="passwordSettings">Password settings read from the configuration file</param>
+        /// <exception cref="InvalidDataException">The exception is raised, if the deleagate for the brute force function is null</exception>
         public static void RestoreEncryptedPassword<T>(Func<T, PDFInitPassSettings, (string, long)> bruteForceFunction, T passwordData, PDFInitPassSettings passwordSettings) where T : BasePasswordData
         {
             Console.WriteLine($"{Environment.NewLine}Starting to restore the password...");
@@ -139,16 +150,16 @@ namespace PDFPassRecovery
             string alphabet = passwordSettings.Alphabet;
             string startPassword = passwordSettings.StartPassword;
 
-            Console.WriteLine($"Password length:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{passwordLength}");
-            Console.WriteLine($"Starting password:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"\"{startPassword}\"");
-            Console.WriteLine($"Starting password length:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{startPassword.Length}");
+            Console.WriteLine($"Password length:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{passwordLength}");
+            Console.WriteLine($"Starting password:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"\"{startPassword}\"");
+            Console.WriteLine($"Starting password length:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{startPassword.Length}");
 
             long totalPasswords = CalculateTotalPasswordsNumber(passwordLength - startPassword.Length, alphabet.Length);
-            Console.WriteLine($"Total number of passwords to check:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{totalPasswords:N0}");
+            Console.WriteLine($"Total number of passwords to check:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{totalPasswords:N0}");
 
             Console.WriteLine();
             DateTime startTime = DateTime.Now;
-            Console.WriteLine($"Brute force started at:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{startTime}");
+            Console.WriteLine($"Brute force started at:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{startTime}");
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -165,7 +176,7 @@ namespace PDFPassRecovery
                 }
                 else
                 {
-                    PrintColoredText($"The password is:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{password}{Environment.NewLine}", ConsoleColor.Green, false);
+                    PrintColoredText($"The password is:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{password}{Environment.NewLine}", ConsoleColor.Green, false);
                 }
             }
             else
@@ -177,14 +188,14 @@ namespace PDFPassRecovery
             TimeSpan elapsed = sw.Elapsed;
 
             DateTime endTime = DateTime.Now;
-            Console.WriteLine($"Brute force ended at:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{endTime}");
+            Console.WriteLine($"Brute force ended at:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{endTime}");
 
             Console.WriteLine($"{Environment.NewLine}*************** STATISTICS ***************");
-            Console.WriteLine($"Total elapsed time:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{elapsed.TotalSeconds:N1} seconds");
+            Console.WriteLine($"Total elapsed time:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{elapsed.TotalSeconds:N1} seconds");
 
-            Console.WriteLine($"Passwords checked:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{passwordsChecked:N0}");
+            Console.WriteLine($"Passwords checked:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{passwordsChecked:N0}");
             double passwordsCheckPerSec = passwordsChecked / elapsed.TotalSeconds;
-            Console.WriteLine($"Performance:".PadRight(PADDING_OFFSET, PADDING_CHAR) + $"{passwordsCheckPerSec:N0} password checks per second");
+            Console.WriteLine($"Performance:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{passwordsCheckPerSec:N0} password checks per second");
 
             Console.WriteLine($"{Environment.NewLine}Have a nice day!");
         }
@@ -234,7 +245,7 @@ namespace PDFPassRecovery
             }
         }
 
-        // Brute force function for PDF 1.7
+        // Brute force function for PDF 1.7 and PDF 2.0
         public static void RestorePDF17Password(PDF17PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             switch (passwordData.R)
@@ -306,6 +317,8 @@ namespace PDFPassRecovery
 
                 passwordsCounter++;
             }
+
+            // No password found
             return (string.Empty, passwordsCounter);
         }
 
@@ -388,6 +401,7 @@ namespace PDFPassRecovery
                 passwordsCounter++;
             }
 
+            // No password found
             return (string.Empty, passwordsCounter);
         }
 
@@ -475,6 +489,8 @@ namespace PDFPassRecovery
                 }
                 passwordsCounter++;
             }
+
+            // No password found
             return (string.Empty, passwordsCounter);
         }
 
@@ -487,36 +503,136 @@ namespace PDFPassRecovery
             // Passwords counter
             long passwordsCounter = 1;
 
+            byte[] paddedPassword = new byte[passwordSettings.PasswordLength + PDF17PasswordData.SaltSize];
+            Buffer.BlockCopy(passwordData.ValidationSalt, 0, paddedPassword, passwordSettings.PasswordLength, PDF17PasswordData.SaltSize);
+
             IEnumerable<byte[]> passwords = GeneratePasswordAsBytes(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
 
             foreach (byte[] password in passwords)
             {
-                byte[] tempPassword = new byte[password.Length];
-                Array.Resize(ref tempPassword, password.Length + PDF17PasswordData.SaltSize);
-                Buffer.BlockCopy(password, 0, tempPassword, 0, password.Length);
-                Buffer.BlockCopy(passwordData.ValidationSalt, 0, tempPassword, password.Length, PDF17PasswordData.SaltSize);
-                
+                // Padding password with the validation salt
+                Buffer.BlockCopy(password, 0, paddedPassword, 0, password.Length);
+
                 SHA256 sha256 = SHA256.Create();
-                sha256.TransformFinalBlock(tempPassword, 0, tempPassword.Length);
+                sha256.TransformFinalBlock(paddedPassword, 0, paddedPassword.Length);
 
                 if (SimpleByteArraysCompare(sha256.Hash, uEntryToCompare))
                 {
-                    string passwordAsString= Encoding.UTF8.GetString(password);
-                    
+                    string passwordAsString = Encoding.UTF8.GetString(password);
                     return (passwordAsString, passwordsCounter);
                 }
                 passwordsCounter++;
             }
 
+            // No password found
             return (string.Empty, passwordsCounter);
         }
 
         public static (string, long) BruteForceSecHandlerR6Password(PDF17PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
-            throw new NotImplementedException($"The brute force of PDF 1.7 ext 8 and PDF 2.0 are not implemented yet");
+            // Save the first 32 bytes of the U entry for comparison
+            byte[] uEntryToCompare = new byte[32];
+            Buffer.BlockCopy(passwordData.UEntry, 0, uEntryToCompare, 0, uEntryToCompare.Length);
+
+            // Passwords counter
+            long passwordsCounter = 1;
+
+            IEnumerable<byte[]> passwords = GeneratePasswordAsBytes(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
+
+            foreach (byte[] password in passwords)
+            {
+                // Padding password with the validations salt
+                byte[] paddedPassword = new byte[passwordSettings.PasswordLength + PDF17PasswordData.SaltSize];
+                Buffer.BlockCopy(password, 0, paddedPassword, 0, password.Length);
+                Buffer.BlockCopy(passwordData.ValidationSalt, 0, paddedPassword, passwordSettings.PasswordLength, PDF17PasswordData.SaltSize);
+
+                SHA256 sha256 = SHA256.Create();
+                byte[] K = sha256.ComputeHash(paddedPassword);
+
+                byte[] E = null;
+
+                // Interations counter for E checks
+                int round = 0;
+                do
+                {
+                    // Step "a"
+                    byte[] shortK1 = new byte[(password.Length + K.Length)];
+                    Buffer.BlockCopy(password, 0, shortK1, 0, password.Length);
+                    Buffer.BlockCopy(K, 0, shortK1, password.Length, K.Length);
+
+                    byte[] K1 = new byte[64 * shortK1.Length];
+                    for (int i = 0; i < 64; i++)
+                    {
+                        Buffer.BlockCopy(shortK1, 0, K1, i * shortK1.Length, shortK1.Length);
+                    }
+
+                    // Step "b"
+                    Aes aes = Aes.Create();
+                    aes.Mode = CipherMode.CBC;
+
+                    byte[] aesKey = new byte[16];
+                    Buffer.BlockCopy(K, 0, aesKey, 0, 16);
+                    aes.Key = aesKey;
+
+                    byte[] aesIV = new byte[16];
+                    Buffer.BlockCopy(K, 16, aesIV, 0, 16);
+                    aes.IV = aesIV;
+
+                    aes.Padding = PaddingMode.None;
+
+                    ICryptoTransform aesEncryptor = aes.CreateEncryptor();
+                    E = aesEncryptor.TransformFinalBlock(K1, 0, K1.Length);
+
+                    // Step "c"
+                    byte[] uBigEndInt = new byte[16];
+                    Buffer.BlockCopy(E, 0, uBigEndInt, 0, 16);
+                    Array.Reverse(uBigEndInt);
+
+                    if (uBigEndInt[15] > 0x7f)
+                    {
+                        byte[] expandArray = new byte[17];
+                        Array.Copy(uBigEndInt, expandArray, 16);
+                        expandArray[16] = 0x00;
+                        uBigEndInt = expandArray;
+                    }
+                    BigInteger newBigInt = new BigInteger(uBigEndInt);
+
+                    // Check the remainder, modulo 3
+                    int remainder3 = (int)(newBigInt % 3);
+
+                    switch (remainder3)
+                    {
+                        case 0:
+                            SHA256 newSha256 = SHA256.Create();
+                            K = newSha256.ComputeHash(E);
+                            break;
+                        case 1:
+                            SHA384 newSha384 = SHA384.Create();
+                            K = newSha384.ComputeHash(E);
+                            break;
+                        case 2:
+                            SHA512 newSha512 = SHA512.Create();
+                            K = newSha512.ComputeHash(E);
+                            break;
+                    }
+                    round++;
+                } while (round < 64 || (uint)E[E.Length - 1] > round - 32);
+
+                byte[] finalKToCompare = new byte[32];
+                Buffer.BlockCopy(K, 0, finalKToCompare, 0, 32);
+
+                if (SimpleByteArraysCompare(finalKToCompare, uEntryToCompare))
+                {
+                    string passwordAsString = Encoding.UTF8.GetString(password);
+                    return (passwordAsString, passwordsCounter);
+                }
+                passwordsCounter++;
+            }
+
+            // No password found
+            return (string.Empty, passwordsCounter);
         }
         #endregion
-
 
         /// <summary>
         /// Function claculates a number of passwords to check based on the password length and alphabet
@@ -524,7 +640,7 @@ namespace PDFPassRecovery
         /// <param name="passwordLength">Length of the password</param>
         /// <param name="alphabet">Password alphabet</param>
         /// <param name="startString">Password to start with</param>
-        /// <returns></returns>
+        /// <returns>A number of passwords to go through</returns>
         public static long CalculateTotalPasswordsNumber(int passwordLength, int alphabetLength)
         {
             long totalPasswords = (long)Math.Pow(alphabetLength, passwordLength);
@@ -532,7 +648,12 @@ namespace PDFPassRecovery
             return totalPasswords;
         }
 
-        // Simple (no input validity checks) comparision of 2 arrays of bytes
+        /// <summary>
+        /// Simple (no input validity checks for the purpose of speed) comparision of 2 arrays of bytes
+        /// </summary>
+        /// <param name="firstArray">First byte array</param>
+        /// <param name="secondArray">Second byte array</param>
+        /// <returns>True if the data in the arrays is the same</returns>
         private static bool SimpleByteArraysCompare(byte[] firstArray, byte[] secondArray)
         {
             for (int i = 0; i < firstArray.Length; i++)
@@ -547,10 +668,12 @@ namespace PDFPassRecovery
 
         #region ***** CONVERTION FUNCTIONS *****
         /// <summary>
-        /// Function converts a hexadecimal string into a byte array. The size of the byte array is 2 times smaller than the length of the input string
+        /// Method converts a hexadecimal string into a byte array. The size of the byte array is 2 times smaller than the length of the input string
         /// </summary>
         /// <param name="hexString">Hexadecimal string</param>
         /// <returns>Byte array of converted values</returns>
+        /// <exception cref="ArgumentException">This exception is thrown, if the input string is null or empty</exception>
+        /// <exception cref="FormatException">This exception is thrown, if the input string contains characters that are not possible to convert into a byte</exception>
         public static byte[] ConvertHexStringToByteArray(string hexString)
         {
             if (string.IsNullOrEmpty(hexString))
@@ -558,11 +681,11 @@ namespace PDFPassRecovery
                 throw new ArgumentException($"The input hex string can't be null or empty");
             }
 
-            // Per PDF specification we need to add a "0" to the end of the hex string, if the length is not even
+            // Per PDF specification we need to add a "0" to the end of the hex string, if the length is odd
             string innerString = hexString;
             if (hexString.Length % 2 != 0) innerString += '0';
 
-            byte[] outputArray = new byte[innerString.Length / 2];
+            byte[] outArray = new byte[innerString.Length / 2];
             try
             {
                 int idCnt = 0;
@@ -572,7 +695,7 @@ namespace PDFPassRecovery
                 for (int i = 0; i < innerString.Length; i += 2)
                 {
                     tempString = innerString.Substring(i, 2);
-                    outputArray[idCnt] = byte.Parse(tempString, NumberStyles.AllowHexSpecifier);
+                    outArray[idCnt] = byte.Parse(tempString, NumberStyles.AllowHexSpecifier);
                     idCnt++;
                 }
             }
@@ -580,7 +703,7 @@ namespace PDFPassRecovery
             {
                 throw new FormatException($"The hex string provided contains non-hex characters", ex);
             }
-            return outputArray;
+            return outArray;
         }
         #endregion
 

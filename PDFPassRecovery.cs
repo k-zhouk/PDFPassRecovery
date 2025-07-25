@@ -54,7 +54,7 @@ namespace PDFPassRecovery
             PDFInitPassSettings passwordSettings = null;
 
             // Getting initial password configuration
-            Console.Write($"Getting program and initial password configuration...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write($"Getting program and initial password configuration...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             try
             {
                 appSettings = PDFPassConfigParser.GetAppSettings();
@@ -68,10 +68,10 @@ namespace PDFPassRecovery
             PDFPassRecoverLib.PrintInfo($"OK");
 
             /**************************************** MAIN BODY ****************************************/
-            Console.Write($"Checking the file...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write($"Checking the file...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
 
             Console.WriteLine(Environment.NewLine);
-            Console.Write($"Checking the file extension...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write($"Checking the file extension...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             string fileExtension = Path.GetExtension(fullFileName).ToUpper();
             if (fileExtension != ".PDF")
             {
@@ -81,11 +81,11 @@ namespace PDFPassRecovery
             PDFPassRecoverLib.PrintInfo($"OK");
 
             long fileSize = fi.Length;
-            Console.Write("File size:".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write("File size:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             PDFPassRecoverLib.PrintInfo($"{fileSize} (bytes)");
 
             PDFFileContent pdfFileContent = null;
-            Console.Write("Reading the file content...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write("Reading the file content...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             try
             {
                 pdfFileContent = PDFParserLib.GetPDFFileContent(fullFileName);
@@ -98,7 +98,7 @@ namespace PDFPassRecovery
             PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
 
             Console.WriteLine();
-            Console.WriteLine($"Checking PDF file validity...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.WriteLine($"Checking PDF file validity...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             try
             {
                 PDFParserLib.CheckPDFValidity(pdfFileContent);
@@ -109,7 +109,7 @@ namespace PDFPassRecovery
                 Environment.Exit(0);
             }
 
-            Console.Write("Checking PDF version...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+            Console.Write("Checking PDF version...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             string pdfVersion = PDFParserLib.GetPDFVersion(pdfFileContent.AsString);
             Console.Write($"{pdfVersion}");
             Console.WriteLine();
@@ -123,7 +123,7 @@ namespace PDFPassRecovery
 
                 case "1.2":
                 case "1.3":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
                     BasePasswordData pdf13PasswordData = PDFParserLib.ExtractPDF12PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintInfo($"Done");
 
@@ -132,7 +132,7 @@ namespace PDFPassRecovery
                     break;
 
                 case "1.4":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
                     PDF14PasswordData pdf14PasswordData = PDFParserLib.ExtractPDF14PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintInfo($"Done");
 
@@ -142,7 +142,7 @@ namespace PDFPassRecovery
 
                 case "1.5":
                 case "1.6":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
                     PDF15PasswordData pdf15PasswordData = PDFParserLib.ExtractPDF15PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintInfo($"Done");
 
@@ -151,15 +151,11 @@ namespace PDFPassRecovery
                     break;
 
                 case "1.7":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassRecoverLib.PADDING_OFFSET, PDFPassRecoverLib.PADDING_CHAR));
+                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
                     PDF17PasswordData pdf17PasswordData = PDFParserLib.ExtractPDF17PasswordData(pdfFileContent);
                     PDFPassRecoverLib.PrintInfo($"Done");
 
-                    if (pdf17PasswordData.R == 6)
-                    {
-                        PDFPassRecoverLib.PrintFatal($"The brute force of PDF 1.7 ext 8 and PDF 2.0 are not implemented yet");
-                    }
-
+                    PDFPassRecoverLib.RestorePDF17Password(pdf17PasswordData, passwordSettings);
                     Environment.Exit(0);
                     break;
 
