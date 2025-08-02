@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <StartArguments>"C:\Test PDFs\Test PDF 1.7 Ext 8 256 Bit Security 2 09876abcde.pdf"</StartArguments>
+    <StartArguments>"C:\Test PDFs\Test PDF 1.6 Word abcde123vwxyz.pdf"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <StartArguments>"C:\Test PDFs\Test PDF 1.7 Ext 8 256 Bit Security 1 abcde09876.pdf"</StartArguments>

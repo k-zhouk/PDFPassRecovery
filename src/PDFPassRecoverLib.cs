@@ -142,7 +142,7 @@ namespace PDFPassRecovery
         /// <param name="passwordData">BasePasswordData object</param>
         /// <param name="passwordSettings">Password settings read from the configuration file</param>
         /// <exception cref="InvalidDataException">The exception is raised, if the deleagate for the brute force function is null</exception>
-        public static void RestoreEncryptedPassword<T>(Func<T, PDFInitPassSettings, (string, long)> bruteForceFunction, T passwordData, PDFInitPassSettings passwordSettings) where T : BasePasswordData
+        public static void RestoreEncryptedPassword<T>(Func<T, PDFInitPassSettings, (string, long)> bruteForceFunction, T passwordData, PDFInitPassSettings passwordSettings) where T : SecHandlerR2PasswordData
         {
             Console.WriteLine($"{Environment.NewLine}Starting to restore the password...");
 
@@ -200,76 +200,8 @@ namespace PDFPassRecovery
             Console.WriteLine($"{Environment.NewLine}Have a nice day!");
         }
 
-        // Brute force function for PDF 1.2 and PDF 1.3
-        public static void RestorePDF12Password(BasePasswordData v1r2PasswordData, PDFInitPassSettings passwordSettings)
-        {
-            switch (v1r2PasswordData.R)
-            {
-                case 2:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR2Password, v1r2PasswordData, passwordSettings);
-                    break;
-            }
-        }
-
-        // Brute force function for PDF 1.4
-        public static void RestorePDF14Password(PDF14PasswordData passwordData, PDFInitPassSettings passwordSettings)
-        {
-            switch (passwordData.R)
-            {
-                case 2:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR2Password, passwordData, passwordSettings);
-                    break;
-
-                case 3:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR3Password, passwordData, passwordSettings);
-                    break;
-            }
-        }
-
-        // Brute force function for PDF 1.5 and PDF 1.6
-        public static void RestorePDF15Password(PDF15PasswordData passwordData, PDFInitPassSettings passwordSettings)
-        {
-            switch (passwordData.R)
-            {
-                case 2:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR2Password, passwordData, passwordSettings);
-                    break;
-
-                case 3:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR3Password, passwordData, passwordSettings);
-                    break;
-
-                case 4:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR4Password, passwordData, passwordSettings);
-                    break;
-            }
-        }
-
-        // Brute force function for PDF 1.7 and PDF 2.0
-        public static void RestorePDF17Password(PDF17PasswordData passwordData, PDFInitPassSettings passwordSettings)
-        {
-            switch (passwordData.R)
-            {
-                case 2:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR2Password, passwordData, passwordSettings);
-                    break;
-                case 3:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR3Password, passwordData, passwordSettings);
-                    break;
-                case 4:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR4Password, passwordData, passwordSettings);
-                    break;
-                case 5:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR5Password, passwordData, passwordSettings);
-                    break;
-                case 6:
-                    RestoreEncryptedPassword(BruteForceSecHandlerR6Password, passwordData, passwordSettings);
-                    break;
-            }
-        }
-
         #region ***** PASSWORDS BRUTE FORCE FUNCTIONS SECTION *****
-        public static (string, long) BruteForceSecHandlerR2Password(BasePasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceSecHandlerR2Password(SecHandlerR2PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int RC4_KEY_SIZE = 5;
@@ -285,7 +217,7 @@ namespace PDFPassRecovery
             Buffer.BlockCopy(passwordData.P, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length, passwordData.P.Length);
             Buffer.BlockCopy(passwordData.Id, 0, fullInputForMd5Hash, PADDED_PASSWORD_LENGTH + passwordData.OEntry.Length + passwordData.P.Length, passwordData.Id.Length);
 
-            long passwordsCounter = 1;
+            long passwordsCounter = 0;
 
             // Generating passwords based on the inputs
             IEnumerable<byte[]> paddedPasswords = GeneratePaddedPassword(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
@@ -293,6 +225,8 @@ namespace PDFPassRecovery
             // Main cycle to check the password
             foreach (byte[] paddedPassword in paddedPasswords)
             {
+                passwordsCounter++;
+
                 MD5 md5 = MD5.Create();
 
                 // Copy the password as a byte array into the full array for MD5 calculation
@@ -314,15 +248,13 @@ namespace PDFPassRecovery
 
                     return (passwordAsString, passwordsCounter);
                 }
-
-                passwordsCounter++;
             }
 
             // No password found
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR3Password(PDF14PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceSecHandlerR3Password(SecHandlerR3PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int MD5_HASH_SIZE = 16;
@@ -353,7 +285,7 @@ namespace PDFPassRecovery
             md35.TransformFinalBlock(passwordData.Id, 0, passwordData.Id.Length);
 
             // Passwords counter
-            long passwordsCounter = 1;
+            long passwordsCounter = 0;
 
             // Generating passwords based on the inputs
             IEnumerable<byte[]> paddedPasswords = GeneratePaddedPassword(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
@@ -361,6 +293,8 @@ namespace PDFPassRecovery
             // Main cycle to check the password
             foreach (byte[] paddedPassword in paddedPasswords)
             {
+                passwordsCounter++;
+
                 // Copy the password as a byte array into the full array for MD5 calculation
                 MD5 newMD5 = MD5.Create();
                 Buffer.BlockCopy(paddedPassword, 0, fullInputForMd5Hash, 0, paddedPassword.Length);
@@ -398,14 +332,13 @@ namespace PDFPassRecovery
 
                     return (passwordAsString, passwordsCounter);
                 }
-                passwordsCounter++;
             }
 
             // No password found
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR4Password(PDF15PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceSecHandlerR4Password(SecHandlerR4PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int MD5_HASH_SIZE = 16;
@@ -442,7 +375,7 @@ namespace PDFPassRecovery
             md35.TransformFinalBlock(passwordData.Id, 0, passwordData.Id.Length);
 
             // Passwords counter
-            long passwordsCounter = 1;
+            long passwordsCounter = 0;
 
             // Generating passwords based on the inputs
             IEnumerable<byte[]> paddedPasswords = GeneratePaddedPassword(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
@@ -450,6 +383,8 @@ namespace PDFPassRecovery
             // Main cycle to check the password
             foreach (byte[] paddedPassword in paddedPasswords)
             {
+                passwordsCounter++;
+
                 // Copy the password as a byte array into the full array for MD5 calculation
                 MD5 newMD5 = MD5.Create();
                 Buffer.BlockCopy(paddedPassword, 0, fullInputForMd5Hash, 0, paddedPassword.Length);
@@ -487,29 +422,30 @@ namespace PDFPassRecovery
 
                     return (passwordAsString, passwordsCounter);
                 }
-                passwordsCounter++;
             }
 
             // No password found
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR5Password(PDF17PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceSecHandlerR5Password(SecHandlerR6PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             // Save the first 32 bytes of the U entry for comparison
             byte[] uEntryToCompare = new byte[32];
             Buffer.BlockCopy(passwordData.UEntry, 0, uEntryToCompare, 0, uEntryToCompare.Length);
 
             // Passwords counter
-            long passwordsCounter = 1;
+            long passwordsCounter = 0;
 
-            byte[] paddedPassword = new byte[passwordSettings.PasswordLength + PDF17PasswordData.SaltSize];
-            Buffer.BlockCopy(passwordData.ValidationSalt, 0, paddedPassword, passwordSettings.PasswordLength, PDF17PasswordData.SaltSize);
+            byte[] paddedPassword = new byte[passwordSettings.PasswordLength + SecHandlerR6PasswordData.SaltSize];
+            Buffer.BlockCopy(passwordData.ValidationSalt, 0, paddedPassword, passwordSettings.PasswordLength, SecHandlerR6PasswordData.SaltSize);
 
             IEnumerable<byte[]> passwords = GeneratePasswordAsBytes(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
 
             foreach (byte[] password in passwords)
             {
+                passwordsCounter++;
+
                 // Padding password with the validation salt
                 Buffer.BlockCopy(password, 0, paddedPassword, 0, password.Length);
 
@@ -519,37 +455,40 @@ namespace PDFPassRecovery
                 if (SimpleByteArraysCompare(sha256.Hash, uEntryToCompare))
                 {
                     string passwordAsString = Encoding.UTF8.GetString(password);
+
                     return (passwordAsString, passwordsCounter);
                 }
-                passwordsCounter++;
             }
 
             // No password found
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR6Password(PDF17PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceSecHandlerR6Password(SecHandlerR6PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             // Save the first 32 bytes of the U entry for comparison
             byte[] uEntryToCompare = new byte[32];
             Buffer.BlockCopy(passwordData.UEntry, 0, uEntryToCompare, 0, uEntryToCompare.Length);
 
+            // Filling in the data that will not be modified
+            byte[] paddedPassword = new byte[passwordSettings.PasswordLength + SecHandlerR6PasswordData.SaltSize];
+            Buffer.BlockCopy(passwordData.ValidationSalt, 0, paddedPassword, passwordSettings.PasswordLength, SecHandlerR6PasswordData.SaltSize);
+
+            byte[] E = null;
+
             // Passwords counter
-            long passwordsCounter = 1;
+            long passwordsCounter = 0;
 
             IEnumerable<byte[]> passwords = GeneratePasswordAsBytes(passwordSettings.PasswordLength, passwordSettings.Alphabet, passwordSettings.StartPassword);
-
             foreach (byte[] password in passwords)
             {
+                passwordsCounter++;
+
                 // Padding password with the validations salt
-                byte[] paddedPassword = new byte[passwordSettings.PasswordLength + PDF17PasswordData.SaltSize];
                 Buffer.BlockCopy(password, 0, paddedPassword, 0, password.Length);
-                Buffer.BlockCopy(passwordData.ValidationSalt, 0, paddedPassword, passwordSettings.PasswordLength, PDF17PasswordData.SaltSize);
 
                 SHA256 sha256 = SHA256.Create();
                 byte[] K = sha256.ComputeHash(paddedPassword);
-
-                byte[] E = null;
 
                 // Interations counter for E checks
                 int round = 0;
@@ -586,20 +525,21 @@ namespace PDFPassRecovery
                     // Step "c"
                     byte[] uBigEndInt = new byte[16];
                     Buffer.BlockCopy(E, 0, uBigEndInt, 0, 16);
+
+                    // The BigInteger constructor is expecting the data in the little-endian format
                     Array.Reverse(uBigEndInt);
 
+                    // Interpreting the byte array as a positive integer
                     if (uBigEndInt[15] > 0x7f)
                     {
                         byte[] expandArray = new byte[17];
-                        Array.Copy(uBigEndInt, expandArray, 16);
-                        expandArray[16] = 0x00;
+                        Buffer.BlockCopy(uBigEndInt, 0, expandArray, 0, 16);
                         uBigEndInt = expandArray;
                     }
                     BigInteger newBigInt = new BigInteger(uBigEndInt);
 
                     // Check the remainder, modulo 3
                     int remainder3 = (int)(newBigInt % 3);
-
                     switch (remainder3)
                     {
                         case 0:
@@ -615,6 +555,7 @@ namespace PDFPassRecovery
                             K = newSha512.ComputeHash(E);
                             break;
                     }
+
                     round++;
                 } while (round < 64 || (uint)E[E.Length - 1] > round - 32);
 
@@ -624,9 +565,9 @@ namespace PDFPassRecovery
                 if (SimpleByteArraysCompare(finalKToCompare, uEntryToCompare))
                 {
                     string passwordAsString = Encoding.UTF8.GetString(password);
+
                     return (passwordAsString, passwordsCounter);
                 }
-                passwordsCounter++;
             }
 
             // No password found
@@ -707,7 +648,7 @@ namespace PDFPassRecovery
         }
         #endregion
 
-        #region ***** OTHER FUNCTIONS *****
+        #region ***** PRINT FUNCTIONS *****
         /// <summary>
         /// Function prints the usage of the program, if no command line arguments were provided
         /// </summary>

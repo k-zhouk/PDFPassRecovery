@@ -14,10 +14,10 @@
         // Size of the encryption object 
         public int Size { get; set; }
 
-        // Flg to indicate whether the encryption object has some entries deleted
+        // Flag to indicate whether the encryption object has any entries removed
         public bool Trimmed { get; set; }
 
-        // Name of the deleted section
+        // Name of the removed section
         public string TrimmedSection { get; set; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿namespace PDFPassRecovery
 {
     /// <summary>
-    /// Class stores the password related data extarcted from a PDF 1.2~ PDF 1.3 file
+    /// Class stores the password related data extracted from a PDF 1.2~ PDF 1.3 file
     /// </summary>
-    public class BasePasswordData
+    public class SecHandlerR2PasswordData
     {
         // Not described in the PDF1.2 standard, but present in an actual encrypted file
         public int V { get; set; }
@@ -49,22 +49,22 @@
     }
 
     /// <summary>
-    /// Class stores the password related data extarcted from a PDF 1.4 file
+    /// Class stores the password related data extracted from a PDF 1.4 file
     /// </summary>
-    public class PDF14PasswordData : BasePasswordData
+    public class SecHandlerR3PasswordData : SecHandlerR2PasswordData
     {
         // Default constructor
-        public PDF14PasswordData() { }
+        public SecHandlerR3PasswordData() { }
 
         // Copy constructor
-        public PDF14PasswordData(BasePasswordData pdf12passwordData)
+        public SecHandlerR3PasswordData(SecHandlerR2PasswordData secHandlerR2PassData)
         {
-            this.V = pdf12passwordData.V;
-            this.R = pdf12passwordData.R;
-            this.OEntry = pdf12passwordData.OEntry;
-            this.UEntry = pdf12passwordData.UEntry;
-            this.P = pdf12passwordData.P;
-            this.Id = pdf12passwordData.Id;
+            this.V = secHandlerR2PassData.V;
+            this.R = secHandlerR2PassData.R;
+            this.OEntry = secHandlerR2PassData.OEntry;
+            this.UEntry = secHandlerR2PassData.UEntry;
+            this.P = secHandlerR2PassData.P;
+            this.Id = secHandlerR2PassData.Id;
         }
 
         // Length of the encryption key
@@ -72,40 +72,44 @@
     }
 
     /// <summary>
-    /// Class stores the password related data extarcted from a PDF 1.5~ PDF 1.6 file
+    /// Class stores the password related data extracted from a PDF 1.5~ PDF 1.6 file
     /// </summary>
-    public class PDF15PasswordData : PDF14PasswordData
+    public class SecHandlerR4PasswordData : SecHandlerR3PasswordData
     {
         // Default constructor
-        public PDF15PasswordData() { }
+        public SecHandlerR4PasswordData() { }
 
         // Copy constructor
-        public PDF15PasswordData(PDF14PasswordData pdf14passwordData) : base(pdf14passwordData) { }
+        public SecHandlerR4PasswordData(SecHandlerR3PasswordData secHandlerR3PassData) : base(secHandlerR3PassData) { }
 
         // Option to encrypt the metadata or not
         public bool EncryptMetadata { get; set; }
     }
 
     /// <summary>
-    /// Class stores the password related data extarcted from a PDF 1.7~ PDF 2.0 file
+    /// Class stores the password related data extracted from a PDF 1.7~ PDF 2.0 file
     /// </summary>
-    public class PDF17PasswordData : PDF15PasswordData
+    public class SecHandlerR6PasswordData : SecHandlerR4PasswordData
     {
-        // TODO: fix me
+        // Default constructor
+        public SecHandlerR6PasswordData() { }
+
+        // Copy constructor
+        public SecHandlerR6PasswordData(SecHandlerR4PasswordData secHandlerR4PassData) : base(secHandlerR4PassData) { }
 
         // O-entry size for PDF 1.7 is 48 bytes
-        public static int OEntrySize { get => 48; }
+        public static new int OEntrySize { get => 48; }
         private byte[] _OEntry = new byte[OEntrySize];
-        public byte[] OEntry
+        public override byte[] OEntry
         {
             get => _OEntry;
             set => _OEntry = value;
         }
 
         // U-entry size for PDF 1.7 is 48 bytes
-        public static int UEntrySize { get => 48; }
+        public static new int UEntrySize { get => 48; }
         private byte[] _UEntry = new byte[UEntrySize];
-        public byte[] UEntry
+        public override byte[] UEntry
         {
             get => _UEntry;
             set => _UEntry = value;
@@ -127,13 +131,6 @@
         {
             get => _ValidationSalt;
             set => _ValidationSalt = value;
-        }
-
-        private byte[] _KeySalt = new byte[SaltSize];
-        public byte[] KeySalt
-        {
-            get => _KeySalt;
-            set => _KeySalt = value;
         }
     }
 }

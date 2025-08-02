@@ -95,7 +95,7 @@ namespace PDFPassRecovery
                 PDFPassRecoverLib.PrintFatal($"Error happened while file reading: {ex.Message}");
                 Environment.Exit(0);
             }
-            PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
+            PDFPassRecoverLib.PrintInfo("OK");
 
             Console.WriteLine();
             Console.WriteLine($"Checking PDF file validity...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
@@ -109,66 +109,41 @@ namespace PDFPassRecovery
                 Environment.Exit(0);
             }
 
-            Console.Write("Checking PDF version...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write($"Checking PDF version...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
             string pdfVersion = PDFParserLib.GetPDFVersion(pdfFileContent.AsString);
             Console.Write($"{pdfVersion}");
             Console.WriteLine();
 
-            switch (pdfVersion)
+            Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            SecHandlerR2PasswordData passwordData = PDFParserLib.ExtractPDFPassData(pdfFileContent);
+            PDFPassRecoverLib.PrintInfo($"Done");
+
+            if (passwordData.GetType() == typeof(SecHandlerR2PasswordData))
             {
-                case "":
-                    PDFPassRecoverLib.PrintFatal($"The version of the PDF format is missing");
-                    Environment.Exit(0);
-                    break;
+                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR2Password, passwordData, passwordSettings);
+            }
+            
+            if (passwordData.GetType() == typeof(SecHandlerR3PasswordData))
+            {
+                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR3Password, (SecHandlerR3PasswordData)passwordData, passwordSettings);
+            }
+            
+            if (passwordData.GetType() == typeof(SecHandlerR4PasswordData))
+            {
+                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR4Password, (SecHandlerR4PasswordData)passwordData, passwordSettings);
+            }
 
-                case "1.2":
-                case "1.3":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-                    BasePasswordData pdf13PasswordData = PDFParserLib.ExtractPDF12PasswordData(pdfFileContent);
-                    PDFPassRecoverLib.PrintInfo($"Done");
-
-                    PDFPassRecoverLib.RestorePDF12Password(pdf13PasswordData, passwordSettings);
-                    Environment.Exit(0);
-                    break;
-
-                case "1.4":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-                    PDF14PasswordData pdf14PasswordData = PDFParserLib.ExtractPDF14PasswordData(pdfFileContent);
-                    PDFPassRecoverLib.PrintInfo($"Done");
-
-                    PDFPassRecoverLib.RestorePDF14Password(pdf14PasswordData, passwordSettings);
-                    Environment.Exit(0);
-                    break;
-
-                case "1.5":
-                case "1.6":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-                    PDF15PasswordData pdf15PasswordData = PDFParserLib.ExtractPDF15PasswordData(pdfFileContent);
-                    PDFPassRecoverLib.PrintInfo($"Done");
-
-                    PDFPassRecoverLib.RestorePDF15Password(pdf15PasswordData, passwordSettings);
-                    Environment.Exit(0);
-                    break;
-
-                case "1.7":
-                    Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-                    PDF17PasswordData pdf17PasswordData = PDFParserLib.ExtractPDF17PasswordData(pdfFileContent);
-                    PDFPassRecoverLib.PrintInfo($"Done");
-
-                    PDFPassRecoverLib.RestorePDF17Password(pdf17PasswordData, passwordSettings);
-                    Environment.Exit(0);
-                    break;
-
-                case "2.0":
-                    Console.WriteLine($"{pdfVersion}");
-                    PDFPassRecoverLib.PrintColoredText("The version 2.0 is not yet supported", ConsoleColor.Red);
-                    Environment.Exit(0);
-                    break;
-
-                default:
-                    PDFPassRecoverLib.PrintColoredText("Unknown version of the PDF version", ConsoleColor.Red);
-                    Environment.Exit(0);
-                    break;
+            if (passwordData.GetType() == typeof(SecHandlerR6PasswordData))
+            {
+                switch (passwordData.R)
+                {
+                    case 5:
+                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR5Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
+                        break;
+                    case 6:
+                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR6Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
+                        break;
+                }
             }
         }
     }
