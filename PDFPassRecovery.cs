@@ -115,7 +115,7 @@ namespace PDFPassRecovery
             Console.WriteLine();
 
             Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-            SecHandlerR2PasswordData passwordData = PDFParserLib.ExtractPDFPassData(pdfFileContent);
+            SecHandlerR2PasswordData passwordData = PDFParserLib.ExtractPasswordData(pdfFileContent);
             PDFPassRecoverLib.PrintInfo($"Done");
 
             if (passwordData.GetType() == typeof(SecHandlerR2PasswordData))

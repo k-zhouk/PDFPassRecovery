@@ -148,25 +148,25 @@ namespace PDFPassRecovery
             return pdfFileContent;
         }
 
-        public static SecHandlerR2PasswordData ExtractPDFPassData(PDFFileContent fileContent)
+        public static SecHandlerR2PasswordData ExtractPasswordData(PDFFileContent fileContent)
         {
             PDFEncryptionObject encryptionObject = ExtractEncryptionObject(fileContent);
 
-            // R value is mandatory for every security handler
+            // R value is required for every security handler
             if (!TryGetNumericalEntry("/R", encryptionObject.AsBytes, out int rValue))
             {
                 throw new InvalidDataException($"Error extracting \"/R\" numerical entry");
             }
 
+            // P value is required
+            if (!TryGetNumericalEntry("/P", encryptionObject.AsBytes, out int pValue))
+            {
+                throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
+            }
+
             switch (rValue)
             {
                 case 2:
-                    // P value shall exist for correct password restore
-                    if (!TryGetNumericalEntry("/P", encryptionObject.AsBytes, out int pValue))
-                    {
-                        throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
-                    }
-
                     SecHandlerR2PasswordData secHandlerR2PassData = new SecHandlerR2PasswordData
                     {
                         OEntry= GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR2PasswordData.OEntrySize),
@@ -178,20 +178,15 @@ namespace PDFPassRecovery
                     return secHandlerR2PassData;
 
                 case 3:
-                    if (!TryGetNumericalEntry("/P", encryptionObject.AsBytes, out pValue))
-                    {
-                        throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
-                    }
-
-                    _ = TryGetNumericalEntry("/Length", encryptionObject.AsBytes, out int keyLengthValue);
+                    _ = TryGetNumericalEntry("/Length", encryptionObject.AsBytes, out int keyLength);
 
                     SecHandlerR3PasswordData secHandlerR3PassData = new SecHandlerR3PasswordData()
                     {
-                        OEntry = GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR2PasswordData.OEntrySize),
+                        OEntry = GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR3PasswordData.OEntrySize),
                         UEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR3PasswordData.UEntrySize),
                         P = BitConverter.GetBytes(pValue),
                         R = rValue,
-                        KeyLength = keyLengthValue,
+                        KeyLength = keyLength,
 
                         Id = ExtractFileID(fileContent)
                     };
@@ -204,34 +199,24 @@ namespace PDFPassRecovery
                         encryptionObject = TrimCFDictionary(encryptionObject);
                     }
 
-                    // P value shall exist for correct password restore
-                    if (!TryGetNumericalEntry("/P", encryptionObject.AsBytes, out pValue))
-                    {
-                        throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
-                    }
-
-                    bool encryptMetadata;
+                    bool encryptMetadata= true;
                     if (TryGetBooleanEntryValue("/EncryptMetadata", encryptionObject.AsBytes, out bool entryValue))
                     {
                         encryptMetadata = entryValue;
                     }
-                    else
-                    {
-                        encryptMetadata = false;
-                    }
 
-                    if (!TryGetNumericalEntry("/Length", encryptionObject.AsBytes, out keyLengthValue))
+                    if (!TryGetNumericalEntry("/Length", encryptionObject.AsBytes, out keyLength))
                     {
                         throw new InvalidDataException($"Error extracting \"/Length\" numerical entry for the length of the encryption key");
                     }
 
                     SecHandlerR4PasswordData secHandlerR4PassData = new SecHandlerR4PasswordData()
                     {
-                        OEntry = GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR2PasswordData.OEntrySize),
+                        OEntry = GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR4PasswordData.OEntrySize),
                         UEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR4PasswordData.UEntrySize),
                         P = BitConverter.GetBytes(pValue),
                         R = rValue,
-                        KeyLength = keyLengthValue,
+                        KeyLength = keyLength,
                         EncryptMetadata = encryptMetadata,
 
                         Id = ExtractFileID(fileContent)
@@ -246,217 +231,26 @@ namespace PDFPassRecovery
                         encryptionObject = TrimCFDictionary(encryptionObject);
                     }
 
-                    if (!TryGetNumericalEntry("/Length", encryptionObject.AsBytes, out keyLengthValue))
+                    if (!TryGetNumericalEntry("/Length", encryptionObject.AsBytes, out keyLength))
                     {
                         throw new InvalidDataException($"Error extracting \"/Length\" numerical entry for the length of the encryption key");
                     }
 
-                    byte[] tempUEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR6PasswordData.UEntrySize);
-                    byte[] tempValidationSalt = new byte[SecHandlerR6PasswordData.SaltSize];
-                    Buffer.BlockCopy(tempUEntry, SecHandlerR2PasswordData.OEntrySize, tempValidationSalt, 0, SecHandlerR6PasswordData.SaltSize);
+                    byte[] uEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR6PasswordData.UEntrySize);
+                    byte[] validationSalt = new byte[SecHandlerR6PasswordData.SaltSize];
+                    Buffer.BlockCopy(uEntry, SecHandlerR2PasswordData.OEntrySize, validationSalt, 0, SecHandlerR6PasswordData.SaltSize);
 
                     SecHandlerR6PasswordData secHandlerR6PassData = new SecHandlerR6PasswordData()
                     {
-                        UEntry = tempUEntry,
-                        ValidationSalt = tempValidationSalt,
-                        KeyLength = keyLengthValue,
+                        UEntry = uEntry,
+                        ValidationSalt = validationSalt,
+                        KeyLength = keyLength,
                         R = rValue
                     };
                     return secHandlerR6PassData;
             }
 
             throw new InvalidDataException($"Error parsing encryption object");
-        }
-
-        /// <summary>
-        /// Method extracts password related data for the PDF 1.2 and PDF 1.3 encryption objects
-        /// </summary>
-        /// <param name="fileContent">PDFFileContent object with the PDF file content</param>
-        /// <returns>BasePasswordData object is returned</returns>
-        public static SecHandlerR2PasswordData ExtractPDF12PasswordData(PDFFileContent fileContent)
-        {
-            byte[] encryptionArray = ExtractEncryptionObject(fileContent).AsBytes;
-
-            // P value shall exist for correct password restore
-            if (!TryGetNumericalEntry("/P", encryptionArray, out int pValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
-            }
-
-            // R value is mandatory for every security handler
-            if (!TryGetNumericalEntry("/R", encryptionArray, out int rValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/R\" numerical entry");
-            }
-
-            _ = TryGetNumericalEntry("/V", encryptionArray, out int vValue);
-
-            SecHandlerR2PasswordData pdf12PasswordData = new SecHandlerR2PasswordData
-            {
-                OEntry = GetArrayEntry("/O", encryptionArray, SecHandlerR2PasswordData.OEntrySize),
-                UEntry = GetArrayEntry("/U", encryptionArray, SecHandlerR2PasswordData.UEntrySize),
-                P = BitConverter.GetBytes(pValue),
-                R = rValue,
-                V = vValue,
-                Id = ExtractFileID(fileContent)
-            };
-
-            return pdf12PasswordData;
-        }
-
-        /// <summary>
-        /// Method extracts data related to the password from the PDF1.4 file
-        /// </summary>
-        /// <param name="fileContent">PDFFileContent object</param>
-        /// <returns>BasePasswordData object</returns>
-        public static SecHandlerR3PasswordData ExtractPDF14PasswordData(PDFFileContent fileContent)
-        {
-            byte[] encryptionArray = ExtractEncryptionObject(fileContent).AsBytes;
-
-            // P value shall exist for correct password restore
-            if (!TryGetNumericalEntry("/P", encryptionArray, out int pValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
-            }
-
-            // R value is mandatory for every security handler
-            if (!TryGetNumericalEntry("/R", encryptionArray, out int rValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/R\" numerical entry");
-            }
-
-            _ = TryGetNumericalEntry("/V", encryptionArray, out int vValue);
-            _ = TryGetNumericalEntry("/Length", encryptionArray, out int keyLengthValue);
-
-            SecHandlerR3PasswordData pdf14PasswordData = new SecHandlerR3PasswordData()
-            {
-                OEntry = GetArrayEntry("/O", encryptionArray, SecHandlerR3PasswordData.OEntrySize),
-                UEntry = GetArrayEntry("/U", encryptionArray, SecHandlerR3PasswordData.UEntrySize),
-                P = BitConverter.GetBytes(pValue),
-                R = rValue,
-                V = vValue,
-                KeyLength = keyLengthValue,
-
-                Id = ExtractFileID(fileContent)
-            };
-
-            return pdf14PasswordData;
-        }
-
-        /// <summary>
-        /// Method extracts data related to the password from the PDF1.5 and PDF 1.6 file
-        /// </summary>
-        /// <param name="fileContent">PDFFileContent object</param>
-        /// <returns>PDF15PasswordData object</returns>
-        public static SecHandlerR4PasswordData ExtractPDF15PasswordData(PDFFileContent fileContent)
-        {
-            PDFEncryptionObject encryptionObject = ExtractEncryptionObject(fileContent);
-
-            // The CF dictionary is optional, so it might not present in the encryption object
-            if (GetStringIndexInArray("/CF", encryptionObject.AsBytes) != -1)
-            {
-                encryptionObject = TrimCFDictionary(encryptionObject);
-            }
-
-            byte[] trimmedEncryptionArray = encryptionObject.AsBytes;
-
-            // P value shall exist for correct password restore
-            if (!TryGetNumericalEntry("/P", trimmedEncryptionArray, out int pValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/P\" numerical entry");
-            }
-
-            bool encryptMetadata;
-            if (TryGetBooleanEntryValue("/EncryptMetadata", trimmedEncryptionArray, out bool entryValue))
-            {
-                encryptMetadata = entryValue;
-            }
-            else
-            {
-                encryptMetadata = false;
-            }
-
-            // R value is mandatory for every security handler
-            if (!TryGetNumericalEntry("/R", trimmedEncryptionArray, out int rValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/R\" numerical entry");
-            }
-
-            _ = TryGetNumericalEntry("/V", trimmedEncryptionArray, out int vValue);
-            _ = TryGetNumericalEntry("/Length", trimmedEncryptionArray, out int keyLengthValue);
-
-            SecHandlerR4PasswordData pdf15PasswordData = new SecHandlerR4PasswordData()
-            {
-                OEntry = GetArrayEntry("/O", trimmedEncryptionArray, SecHandlerR4PasswordData.OEntrySize),
-                UEntry = GetArrayEntry("/U", trimmedEncryptionArray, SecHandlerR4PasswordData.UEntrySize),
-                P = BitConverter.GetBytes(pValue),
-                R = rValue,
-                V = vValue,
-                KeyLength = keyLengthValue,
-                EncryptMetadata = encryptMetadata,
-
-                Id = ExtractFileID(fileContent)
-            };
-
-            return pdf15PasswordData;
-        }
-
-        /// <summary>
-        /// /// Method extracts data related to the password from the PDF1.7 and PDF 2.0 file
-        /// </summary>
-        /// <param name="fileContent">PDFFileContent object</param>
-        /// <returns>PDF17PasswordData object</returns>
-        public static SecHandlerR6PasswordData ExtractPDF17PasswordData(PDFFileContent fileContent)
-        {
-            PDFEncryptionObject encryptionObject = ExtractEncryptionObject(fileContent);
-
-            PDFEncryptionObject trimmedEncryptionObject = TrimCFDictionary(encryptionObject);
-
-            byte[] trimmedEncryptionArray = TrimCFDictionary(encryptionObject).AsBytes;
-            /*
-            int pValue = TryGetNumericalEntry("/P", trimmedEncryptionArray);
-
-            bool encryptMetadata;
-            if (TryGetBooleanEntryValue("/EncryptMetadata", trimmedEncryptionArray, out bool entryValue))
-            {
-                encryptMetadata = entryValue;
-            }
-            else
-            {
-                encryptMetadata = false;
-            }
-            */
-
-            // R value is mandatory for every security handler
-            if (!TryGetNumericalEntry("/R", trimmedEncryptionArray, out int rValue))
-            {
-                throw new InvalidDataException($"Error extracting \"/R\" numerical entry");
-            }
-
-            _ = TryGetNumericalEntry("/V", trimmedEncryptionArray, out int vValue);
-
-            byte[] tempUEntry = GetArrayEntry("/U", trimmedEncryptionArray, SecHandlerR6PasswordData.UEntrySize);
-            byte[] tempValidationSalt = new byte[SecHandlerR6PasswordData.SaltSize];
-            Buffer.BlockCopy(tempUEntry, SecHandlerR2PasswordData.OEntrySize, tempValidationSalt, 0, SecHandlerR6PasswordData.SaltSize);
-
-            _ = TryGetNumericalEntry("/Length", trimmedEncryptionArray, out int keyLengthValue);
-
-            SecHandlerR6PasswordData pdf17PasswordData = new SecHandlerR6PasswordData()
-            {
-                // OEntry = GetArrayEntry("/O", trimmedEncryptionArray, PDF17PasswordData.OEntrySize),
-                UEntry = tempUEntry,
-                ValidationSalt = tempValidationSalt,
-                // P = BitConverter.GetBytes(pValue),
-                R = rValue,
-                V = vValue,
-                KeyLength = keyLengthValue,
-                // EncryptMetadata = encryptMetadata,
-                // UEEntry = GetArrayEntry("/UE", trimmedEncryptionArray, PDF17PasswordData.UEEntrySize),
-
-                // Id = ExtractFileID(fileContent)
-            };
-
-            return pdf17PasswordData;
         }
 
         /// <summary>
