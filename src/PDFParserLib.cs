@@ -169,7 +169,7 @@ namespace PDFPassRecovery
                 case 2:
                     SecHandlerR2PasswordData secHandlerR2PassData = new SecHandlerR2PasswordData
                     {
-                        OEntry= GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR2PasswordData.OEntrySize),
+                        OEntry = GetArrayEntry("/O", encryptionObject.AsBytes, SecHandlerR2PasswordData.OEntrySize),
                         UEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR2PasswordData.UEntrySize),
                         P = BitConverter.GetBytes(pValue),
                         R = rValue,
@@ -186,9 +186,9 @@ namespace PDFPassRecovery
                         UEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR3PasswordData.UEntrySize),
                         P = BitConverter.GetBytes(pValue),
                         R = rValue,
-                        KeyLength = keyLength,
+                        Id = ExtractFileID(fileContent),
 
-                        Id = ExtractFileID(fileContent)
+                        KeyLength = keyLength
                     };
                     return secHandlerR3PassData;
 
@@ -199,7 +199,7 @@ namespace PDFPassRecovery
                         encryptionObject = TrimCFDictionary(encryptionObject);
                     }
 
-                    bool encryptMetadata= true;
+                    bool encryptMetadata = true;
                     if (TryGetBooleanEntryValue("/EncryptMetadata", encryptionObject.AsBytes, out bool entryValue))
                     {
                         encryptMetadata = entryValue;
@@ -216,10 +216,10 @@ namespace PDFPassRecovery
                         UEntry = GetArrayEntry("/U", encryptionObject.AsBytes, SecHandlerR4PasswordData.UEntrySize),
                         P = BitConverter.GetBytes(pValue),
                         R = rValue,
+                        Id = ExtractFileID(fileContent),
                         KeyLength = keyLength,
-                        EncryptMetadata = encryptMetadata,
 
-                        Id = ExtractFileID(fileContent)
+                        EncryptMetadata = encryptMetadata
                     };
                     return secHandlerR4PassData;
 

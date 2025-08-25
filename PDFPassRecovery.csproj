@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\OptimizedRC4.cs" />
+    <Compile Include="src\PDFBruteForceFunctions.cs" />
     <Compile Include="src\PDFEncryptionObject.cs" />
     <Compile Include="src\PDFFileContent.cs" />
     <Compile Include="src\PDFParserLib.cs" />

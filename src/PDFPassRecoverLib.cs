@@ -201,7 +201,7 @@ namespace PDFPassRecovery
         }
 
         #region ***** PASSWORDS BRUTE FORCE FUNCTIONS SECTION *****
-        public static (string, long) BruteForceSecHandlerR2Password(SecHandlerR2PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceR2SecHandler(SecHandlerR2PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int RC4_KEY_SIZE = 5;
@@ -254,7 +254,7 @@ namespace PDFPassRecovery
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR3Password(SecHandlerR3PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceR3SecHandler(SecHandlerR3PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int MD5_HASH_SIZE = 16;
@@ -338,7 +338,7 @@ namespace PDFPassRecovery
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR4Password(SecHandlerR4PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceR4SecHandler(SecHandlerR4PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
             const int MD5_HASH_SIZE = 16;
@@ -428,7 +428,7 @@ namespace PDFPassRecovery
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR5Password(SecHandlerR6PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceR5SecHandler(SecHandlerR6PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             // Save the first 32 bytes of the U entry for comparison
             byte[] uEntryToCompare = new byte[32];
@@ -464,7 +464,7 @@ namespace PDFPassRecovery
             return (string.Empty, passwordsCounter);
         }
 
-        public static (string, long) BruteForceSecHandlerR6Password(SecHandlerR6PasswordData passwordData, PDFInitPassSettings passwordSettings)
+        public static (string, long) BruteForceR6SecHandler(SecHandlerR6PasswordData passwordData, PDFInitPassSettings passwordSettings)
         {
             // Save the first 32 bytes of the U entry for comparison
             byte[] uEntryToCompare = new byte[32];

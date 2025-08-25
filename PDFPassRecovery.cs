@@ -18,7 +18,7 @@ namespace PDFPassRecovery
             switch (args.Length)
             {
                 case 0:
-                    PDFPassRecoverLib.PrintColoredText($"No arguments have been provided!", ConsoleColor.Red);
+                    PDFPassRecoverLib.PrintColoredText($"No arguments provided!", ConsoleColor.Red);
                     PDFPassRecoverLib.PrintHelp();
                     Environment.Exit(0);
                     break;
@@ -44,7 +44,7 @@ namespace PDFPassRecovery
                     break;
 
                 default:
-                    PDFPassRecoverLib.PrintFatal($"Too many arguments have been provided!");
+                    PDFPassRecoverLib.PrintFatal($"Too many arguments provided!");
                     PDFPassRecoverLib.PrintHelp();
                     Environment.Exit(0);
                     break;
@@ -120,17 +120,17 @@ namespace PDFPassRecovery
 
             if (passwordData.GetType() == typeof(SecHandlerR2PasswordData))
             {
-                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR2Password, passwordData, passwordSettings);
+                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceR2SecHandler, passwordData, passwordSettings);
             }
             
             if (passwordData.GetType() == typeof(SecHandlerR3PasswordData))
             {
-                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR3Password, (SecHandlerR3PasswordData)passwordData, passwordSettings);
+                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceR3SecHandler, (SecHandlerR3PasswordData)passwordData, passwordSettings);
             }
             
             if (passwordData.GetType() == typeof(SecHandlerR4PasswordData))
             {
-                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR4Password, (SecHandlerR4PasswordData)passwordData, passwordSettings);
+                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceR4SecHandler, (SecHandlerR4PasswordData)passwordData, passwordSettings);
             }
 
             if (passwordData.GetType() == typeof(SecHandlerR6PasswordData))
@@ -138,10 +138,10 @@ namespace PDFPassRecovery
                 switch (passwordData.R)
                 {
                     case 5:
-                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR5Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
+                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceR5SecHandler, (SecHandlerR6PasswordData)passwordData, passwordSettings);
                         break;
                     case 6:
-                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR6Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
+                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceR6SecHandler, (SecHandlerR6PasswordData)passwordData, passwordSettings);
                         break;
                 }
             }
