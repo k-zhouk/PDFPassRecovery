@@ -9,8 +9,8 @@ namespace PDFPassRecovery
         static void Main(string[] args)
         {
             // Getting version of the programm
-            string programVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Console.WriteLine($"{Environment.NewLine}... PDF Password Recovery Tool (ver. {programVersion}) ...{Environment.NewLine}");
+            string programVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Console.WriteLine($"{Environment.NewLine}... PDF Password Recovery Tool (ver. {programVer}) ...{Environment.NewLine}");
 
             FileInfo fi = null;
             string fullFileName = string.Empty;
@@ -24,34 +24,33 @@ namespace PDFPassRecovery
                     break;
 
                 case 1:
-                    string parameter = args[0];
+                    string programArg = args[0];
 
                     // Display help
-                    if (parameter == "-h")
+                    if (programArg == "-h")
                     {
                         PDFPassRecoverLib.PrintHelp();
                         Environment.Exit(0);
                     }
 
                     // Otherwise treat the 1st argument as a path to the PDF file
-                    fullFileName = parameter;
-                    fi = new FileInfo(parameter);
+                    fi = new FileInfo(programArg);
                     if (!fi.Exists)
                     {
-                        PDFPassRecoverLib.PrintColoredText($"{Environment.NewLine}The file \"{parameter}\" doesn't exist", ConsoleColor.Red);
-                        Environment.Exit(0);
+                        PDFPassRecoverLib.PrintColoredText($"{Environment.NewLine}The file \"{programArg}\" doesn't exist", ConsoleColor.Red);
+                        Environment.Exit(1);
                     }
                     break;
 
                 default:
-                    PDFPassRecoverLib.PrintFatal($"Too many arguments have been provided!");
+                    PDFPassRecoverLib.PrintFatal($"Too many arguments");
                     PDFPassRecoverLib.PrintHelp();
-                    Environment.Exit(0);
+                    Environment.Exit(1);
                     break;
             }
 
-            PDFPassAppSettings appSettings = null;
-            PDFInitPassSettings passwordSettings = null;
+            AppSettings appSettings = null;
+            PassSettings passwordSettings = null;
 
             // Getting initial password configuration
             Console.Write($"Getting program and initial password configuration...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));

@@ -20,7 +20,7 @@ namespace PDFPassRecovery
         /// </summary>
         /// <returns>PDFPassAppSettings object with application settings</returns>
         /// <exception cref="InvalidDataException">Exception is thrown, if required elements are missing</exception>
-        public static PDFPassAppSettings GetAppSettings()
+        public static AppSettings GetAppSettings()
         {
             XElement configContent = GetConfigFileContent();
 
@@ -30,7 +30,7 @@ namespace PDFPassRecovery
             {
                 throw new InvalidDataException($"The \"ReportingTimeSpan\" setting is not a proper decimal number");
             }
-            PDFPassAppSettings appSettings = new PDFPassAppSettings(reportingTimeSpan);
+            AppSettings appSettings = new AppSettings(reportingTimeSpan);
 
             return appSettings;
         }
@@ -40,7 +40,7 @@ namespace PDFPassRecovery
         /// </summary>
         /// <returns>PDFInitPassSettings object with initial password, total password length and the alphabet</returns>
         /// <exception cref="InvalidDataException"></exception>
-        public static PDFInitPassSettings GetInitPassSettings()
+        public static PassSettings GetInitPassSettings()
         {
             XElement configContent = GetConfigFileContent();
 
@@ -79,13 +79,13 @@ namespace PDFPassRecovery
                 throw new InvalidDataException($"The alphabet used for password geeneration is null or empty");
             }
 
-            PDFInitPassSettings initPassSettings = new PDFInitPassSettings(startPassword, passwordLength, alphabet);
+            PassSettings initPassSettings = new PassSettings(startPassword, passwordLength, alphabet);
             return initPassSettings;
         }
         #endregion
 
         #region *************** RESTAR SETTINGS PARSING ***************
-        public static PDFRestartState GetRestartSettings()
+        public static AppState GetRestartSettings()
         {
             throw new NotImplementedException();
         }

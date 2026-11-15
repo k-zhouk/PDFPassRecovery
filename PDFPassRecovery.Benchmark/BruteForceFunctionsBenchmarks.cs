@@ -7,7 +7,7 @@ namespace PDFPassRecovery.Benchmark
         const string passStart = "987654";
         const int passLength = 10;
         const string passAlphabet = "0123456789";
-        readonly PDFInitPassSettings passSettings = new PDFInitPassSettings(passStart, passLength, passAlphabet);
+        readonly PassSettings passSettings = new PassSettings(passStart, passLength, passAlphabet);
 
         #region *************** SINGLE THREADED MANAGED BRUTE FORCE FUNCTIONS BENCHMARKS ***************
         [Benchmark]
@@ -56,7 +56,7 @@ namespace PDFPassRecovery.Benchmark
                 KeyLength = 128,
                 EncryptMetadata = false
             };
-            (string password, long passwordsNum) = PDFPassRecoverLib.BruteForceSecHandlerR3Password(v4r4PasswordData, passSettings);
+            (string password, long passwordsNum) = PDFPassRecoverLib.BruteForceSecHandlerR4Password(v4r4PasswordData, passSettings);
         }
         #endregion
 

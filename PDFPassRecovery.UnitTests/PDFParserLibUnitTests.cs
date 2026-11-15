@@ -470,7 +470,7 @@ namespace PDFPassRecovery.UnitTests
             string entryName = "/EncryptMetadata";
 
             // Act
-            bool extractionResult = PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionArray, out bool entryValue);
+            bool extractionResult = PDFParserLib.TryGetBooleanEntryValue(entryName, encryptionArray, out bool _);
 
             // Assert
             Assert.False(extractionResult);
@@ -578,7 +578,7 @@ namespace PDFPassRecovery.UnitTests
             int expectedKeyLength = 40;
 
             // Act
-            int keyLength = PDFParserLib.GetNumericalEntry(entryName, encryptionArray);
+            var _ = PDFParserLib.TryGetNumericalEntry(entryName, encryptionArray, out int keyLength);
 
             // Assert
             Assert.Equal(expectedKeyLength, keyLength);
@@ -618,7 +618,7 @@ namespace PDFPassRecovery.UnitTests
             int expectedKeyLength = 128;
 
             // Act
-            int keyLength = PDFParserLib.GetNumericalEntry(entryName, encryptionArray);
+            var _ = PDFParserLib.TryGetNumericalEntry(entryName, encryptionArray, out int keyLength);
 
             // Assert
             Assert.Equal(expectedKeyLength, keyLength);
@@ -660,19 +660,21 @@ namespace PDFPassRecovery.UnitTests
                                       0x72, 0x46, 0x2F, 0x53, 0x74, 0x64, 0x43, 0x46, 0x2F, 0x45, 0x6E, 0x63, 0x72, 0x79, 0x70, 0x74,
                                       0x4D, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x20, 0x66, 0x61, 0x6C, 0x73, 0x65, 0x3E, 0x3E,
                                       0x0D, 0x65, 0x6E, 0x64, 0x6F, 0x62, 0x6A };
-            
-            PDFEncryptionObject fullEncryptionObject= new PDFEncryptionObject();
-            fullEncryptionObject.AsString = @"21 0 obj<</R 4/Length 128/Filter/Standard/O(...w......]\r....|.K@3Hy.'Q3...g.)/P -3132/U(A..XP.= ...-0...................)/V 4/CF<</StdCF<</Length 16/CFM/V2/AuthEvent/DocOpen>>>>/StmF/StdCF/StrF/StdCF/EncryptMetadata false>>.endobj";
-            fullEncryptionObject.AsBytes= encryptionArray;
-            fullEncryptionObject.Size= encryptionArray.Length;
 
-            byte[] trimmedEncryptionArray= PDFParserLib.TrimCFDictionary(fullEncryptionObject).AsBytes;
+            PDFEncryptionObject fullEncryptionObject = new PDFEncryptionObject
+            {
+                AsString = @"21 0 obj<</R 4/Length 128/Filter/Standard/O(...w......]\r....|.K@3Hy.'Q3...g.)/P -3132/U(A..XP.= ...-0...................)/V 4/CF<</StdCF<</Length 16/CFM/V2/AuthEvent/DocOpen>>>>/StmF/StdCF/StrF/StdCF/EncryptMetadata false>>.endobj",
+                AsBytes = encryptionArray,
+                Size = encryptionArray.Length
+            };
+
+            byte[] trimmedEncryptionArray = PDFParserLib.TrimCFDictionary(fullEncryptionObject).AsBytes;
 
             string entryName = "/Length";
             int expectedKeyLength = 128;
 
             // Act
-            int keyLength = PDFParserLib.GetNumericalEntry(entryName, trimmedEncryptionArray);
+            var _ = PDFParserLib.TryGetNumericalEntry(entryName, trimmedEncryptionArray, out int keyLength);
 
             // Assert
             Assert.Equal(expectedKeyLength, keyLength);
@@ -723,10 +725,11 @@ namespace PDFPassRecovery.UnitTests
                                        0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x3E, 0x2F, 0x56, 0x20, 0x34, 0x3E, 0x3E, 0x0D, 0x0A,
                                        0x65, 0x6E, 0x64, 0x6F, 0x62, 0x6A };
 
-            PDFEncryptionObject fullEncryptionObject = new PDFEncryptionObject();
-            fullEncryptionObject.AsString = @"85 0 obj..<</CF<</StdCF<</AuthEvent/DocOpen/CFM/AESV2/Length 16>>>>/Filter/Standard/Length 128/O<DE31DCBCEBFED0F6CBC6D1B3ED41EB6A94195F5A4AA2BB1D69CDAA79B8962AC1> /P -1060/R 4/StmF /StdCF /StrF /StdCF /U< E1144B1FAFCA41AA6EC6D09134179B0F00000000000000000000000000000000>/V4>> ..endobj";
-            fullEncryptionObject.AsBytes = encryptionArray;
-            fullEncryptionObject.Size = encryptionArray.Length;
+            PDFEncryptionObject fullEncryptionObject = new PDFEncryptionObject {
+                AsString = @"85 0 obj..<</CF<</StdCF<</AuthEvent/DocOpen/CFM/AESV2/Length 16>>>>/Filter/Standard/Length 128/O<DE31DCBCEBFED0F6CBC6D1B3ED41EB6A94195F5A4AA2BB1D69CDAA79B8962AC1> /P -1060/R 4/StmF /StdCF /StrF /StdCF /U< E1144B1FAFCA41AA6EC6D09134179B0F00000000000000000000000000000000>/V4>> ..endobj",
+                AsBytes = encryptionArray,
+                Size = encryptionArray.Length
+            };
 
             byte[] trimmedEncryptionArray = PDFParserLib.TrimCFDictionary(fullEncryptionObject).AsBytes;
 
@@ -734,7 +737,7 @@ namespace PDFPassRecovery.UnitTests
             int expectedKeyLength = 128;
 
             // Act
-            int keyLength = PDFParserLib.GetNumericalEntry(entryName, trimmedEncryptionArray);
+            var _ = PDFParserLib.TryGetNumericalEntry(entryName, trimmedEncryptionArray, out int keyLength);
 
             // Assert
             Assert.Equal(expectedKeyLength, keyLength);
@@ -742,6 +745,8 @@ namespace PDFPassRecovery.UnitTests
         #endregion
     }
 }
+
+// Template for a test
 
 //[Fact]
 //public void TEST_NAME_Test()

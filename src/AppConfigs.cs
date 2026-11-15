@@ -5,11 +5,11 @@ namespace PDFPassRecovery
     /// <summary>
     /// Class for the application settings
     /// </summary>
-    public class PDFPassAppSettings
+    public class AppSettings
     {
         public int ReportingTimeSpan { get; }
 
-        public PDFPassAppSettings(int timeSpan)
+        public AppSettings(int timeSpan)
         {
             ReportingTimeSpan = timeSpan;
         }
@@ -18,29 +18,29 @@ namespace PDFPassRecovery
     /// <summary>
     /// Class for the initial password settings
     /// </summary>
-    public class PDFInitPassSettings
+    public class PassSettings
     {
+        public PassSettings(string startPassword, int passwordLength, string alphabet)
+        {
+            StartPassword = startPassword;
+            PasswordLength = passwordLength;
+            Alphabet = alphabet;
+        }
+
         // Password to start the brute force from
         public string StartPassword { get; }
 
         // Total length of the password to check
         public int PasswordLength { get; }
 
-        // Alphabet to guess the password
+        // Alphabet to construct the password
         public string Alphabet { get; }
-
-        public PDFInitPassSettings(string startPassword, int passwordLength, string alphabet)
-        {
-            StartPassword = startPassword;
-            PasswordLength = passwordLength;
-            Alphabet = alphabet;
-        }
     }
 
     /// <summary>
     /// Class for the settings in case of application restart
     /// </summary>
-    public class PDFRestartState
+    public class AppState
     {
         // Date and time when the last run was stopped
         public DateTime stopDateTime { get; set; }
@@ -52,7 +52,7 @@ namespace PDFPassRecovery
         public string lastCheckedPassword { get; set; }
 
         // The alphabet used for password guessing
-        public string Alphabet { get; set; }
+        public string alphabet { get; set; }
 
         // How many password has been already checked
         public long passwordsChecked { get; set; }

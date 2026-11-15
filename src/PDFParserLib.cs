@@ -695,7 +695,7 @@ namespace PDFPassRecovery
             byte[] subArray = Encoding.ASCII.GetBytes(inString);
 
             int index = -1;
-            for (int i = 0; i < inArray.Length - inString.Length; i++)
+            for (int i = 0; i <= inArray.Length - inString.Length; i++)
             {
                 if (inArray[i] == subArray[0])
                 {

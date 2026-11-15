@@ -13,10 +13,10 @@
       0123456789
     </DecimalSet>
     <UpperAlphaSet use="no">
-      abcdefghijklmnopqrstuvwxyz
+      ABCDEFGHIJKLMNOPQRSTUVWXYZ
     </UpperAlphaSet>
     <LowerAlphaSet use="no">
-      ABCDEFGHIJKLMNOPQRSTUVWXYZ
+      abcdefghijklmnopqrstuvwxyz
     </LowerAlphaSet>
     <SpecialSet use="no">
       ! &quot;#$%&amp;&apos;()*+,-./:;&lt;=&gt;?@[\]^_`{|}~

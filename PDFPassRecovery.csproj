@@ -80,7 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\OptimizedRC4.cs" />
+    <Compile Include="src\CustomARC4.cs" />
     <Compile Include="src\PDFEncryptionObject.cs" />
     <Compile Include="src\PDFFileContent.cs" />
     <Compile Include="src\PDFParserLib.cs" />
@@ -90,11 +90,12 @@
     <Compile Include="PDFPassRecovery.cs" />
     <Compile Include="src\PDFPassSystem.cs" />
     <Compile Include="src\PDFPasswordData.cs" />
-    <Compile Include="src\PDFPassConfigs.cs" />
+    <Compile Include="src\AppConfigs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
