@@ -15,7 +15,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            ArgumentException ex = Assert.Throws<ArgumentException>(() => PDFPassRecoverLib.ConvertHexStringToByteArray(testString));
+            ArgumentException ex = Assert.Throws<ArgumentException>(() => Utils.ConvertHexStrToByteArr(testString));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -29,7 +29,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            ArgumentException ex = Assert.Throws<ArgumentException>(() => PDFPassRecoverLib.ConvertHexStringToByteArray(testString));
+            ArgumentException ex = Assert.Throws<ArgumentException>(() => Utils.ConvertHexStrToByteArr(testString));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -43,7 +43,7 @@ namespace PDFPassRecovery.UnitTests
             // Act
 
             // Assert
-            FormatException ex = Assert.Throws<FormatException>(() => PDFPassRecoverLib.ConvertHexStringToByteArray(testString));
+            FormatException ex = Assert.Throws<FormatException>(() => Utils.ConvertHexStrToByteArr(testString));
             Assert.Equal(expectedMessage, ex.Message);
         }
 
@@ -54,7 +54,7 @@ namespace PDFPassRecovery.UnitTests
             string testString = "47290f1b92a06444885ac3a06c1f5877";
 
             // Act
-            byte[] testArray = PDFPassRecoverLib.ConvertHexStringToByteArray(testString);
+            byte[] testArray = Utils.ConvertHexStrToByteArr(testString);
 
             // Assert
             string arrayAsString = BitConverter.ToString(testArray).Replace("-", string.Empty);
@@ -78,7 +78,7 @@ namespace PDFPassRecovery.UnitTests
             }
 
             // Act
-            byte[] testArray = PDFPassRecoverLib.ConvertHexStringToByteArray(testString);
+            byte[] testArray = Utils.ConvertHexStrToByteArr(testString);
 
             // Assert
             string arrayAsString = BitConverter.ToString(testArray).Replace("-", string.Empty);
@@ -103,7 +103,7 @@ namespace PDFPassRecovery.UnitTests
             }
 
             // Act
-            byte[] testArray = PDFPassRecoverLib.ConvertHexStringToByteArray(testString);
+            byte[] testArray = Utils.ConvertHexStrToByteArr(testString);
 
             // Assert
             string arrayAsString = BitConverter.ToString(testArray).Replace("-", string.Empty);

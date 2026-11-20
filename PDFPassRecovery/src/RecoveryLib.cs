@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 
 namespace PDFPassRecovery
 {
-    public static class PDFPassRecoverLib
+    public static class RecoveryLib
     {
         /// <summary>
         /// Method generates a padded password per PDF 1.2~ PDF 1.6 specs based on the parameters provided- password length, alphabet and start string
@@ -150,16 +150,16 @@ namespace PDFPassRecovery
             string alphabet = passwordSettings.Alphabet;
             string startPassword = passwordSettings.StartPassword;
 
-            Console.WriteLine($"Password length:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{passwordLength}");
-            Console.WriteLine($"Starting password:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"\"{startPassword}\"");
-            Console.WriteLine($"Starting password length:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{startPassword.Length}");
+            Console.WriteLine($"Password length:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{passwordLength}");
+            Console.WriteLine($"Starting password:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"\"{startPassword}\"");
+            Console.WriteLine($"Starting password length:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{startPassword.Length}");
 
-            long totalPasswords = CalculateTotalPasswordsNumber(passwordLength - startPassword.Length, alphabet.Length);
-            Console.WriteLine($"Total number of passwords to check:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{totalPasswords:N0}");
+            long totalPasswords = Utils.CalcTotalPasswordsNumber(passwordLength - startPassword.Length, alphabet.Length);
+            Console.WriteLine($"Total number of passwords to check:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{totalPasswords:N0}");
 
             Console.WriteLine();
             DateTime startTime = DateTime.Now;
-            Console.WriteLine($"Brute force started at:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{startTime}");
+            Console.WriteLine($"Brute force started at:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{startTime}");
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -172,11 +172,11 @@ namespace PDFPassRecovery
                 (password, passwordsChecked) = bruteForceFunction.Invoke(passwordData, passwordSettings);
                 if (password == string.Empty)
                 {
-                    PrintColoredText($"The password has not been found :(", ConsoleColor.Red);
+                    Utils.PrintColoredText($"The password has not been found :(", ConsoleColor.DarkRed);
                 }
                 else
                 {
-                    PrintColoredText($"The password is:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{password}{Environment.NewLine}", ConsoleColor.Green, false);
+                    Utils.PrintOK($"The password is:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{password}{Environment.NewLine}", false);
                 }
             }
             else
@@ -188,19 +188,19 @@ namespace PDFPassRecovery
             TimeSpan elapsed = sw.Elapsed;
 
             DateTime endTime = DateTime.Now;
-            Console.WriteLine($"Brute force ended at:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{endTime}");
+            Console.WriteLine($"Brute force ended at:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{endTime}");
 
             Console.WriteLine($"{Environment.NewLine}*************** STATISTICS ***************");
-            Console.WriteLine($"Total elapsed time:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{elapsed.TotalSeconds:N1} seconds");
+            Console.WriteLine($"Total elapsed time:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{elapsed.TotalSeconds:N1} seconds");
 
-            Console.WriteLine($"Passwords checked:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{passwordsChecked:N0}");
+            Console.WriteLine($"Passwords checked:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{passwordsChecked:N0}");
             double passwordsCheckPerSec = passwordsChecked / elapsed.TotalSeconds;
-            Console.WriteLine($"Performance:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR) + $"{passwordsCheckPerSec:N0} password checks per second");
+            Console.WriteLine($"Performance:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR) + $"{passwordsCheckPerSec:N0} password checks per second");
 
             Console.WriteLine($"{Environment.NewLine}Have a nice day!");
         }
 
-        #region ***** PASSWORDS BRUTE FORCE FUNCTIONS SECTION *****
+        #region ***** PASSWORDS BRUTE FORCE FUNCTIONS *****
         public static (string, long) BruteForceSecHandlerR2Password(SecHandlerR2PasswordData passwordData, PassSettings passwordSettings)
         {
             byte[] PADDING_STRING = { 0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08, 0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A };
@@ -236,11 +236,9 @@ namespace PDFPassRecovery
                 // Extract 5 bytes for the RC4 encryption key
                 Buffer.BlockCopy(md5.Hash, 0, rc4encryptionKey, 0, RC4_KEY_SIZE);
 
-                CustomARC4 rc4 = new CustomARC4();
-                rc4.Initialize(rc4encryptionKey);
-                rc4.Encrypt(PADDING_STRING, rc4outBuffer);
+                CustomARC4.Encrypt(PADDING_STRING, rc4outBuffer, rc4encryptionKey);
 
-                if (SimpleByteArraysCompare(rc4outBuffer, passwordData.UEntry))
+                if (Utils.ByteArraysCompare(rc4outBuffer, passwordData.UEntry))
                 {
                     byte[] passwordAsBytes = new byte[passwordSettings.PasswordLength];
                     Buffer.BlockCopy(paddedPassword, 0, passwordAsBytes, 0, passwordSettings.PasswordLength);
@@ -309,9 +307,7 @@ namespace PDFPassRecovery
                 }
                 rc4encryptionKey = newMD5Hash;
 
-                CustomARC4 naiveRC4 = new CustomARC4();
-                naiveRC4.Initialize(rc4encryptionKey);
-                naiveRC4.Encrypt(md35.Hash, rc4outBuffer);
+                CustomARC4.Encrypt(md35.Hash, rc4outBuffer, rc4encryptionKey);
 
                 for (int i = 1; i < 20; i++)
                 {
@@ -320,11 +316,10 @@ namespace PDFPassRecovery
                     {
                         rc4newKey[j] = (byte)(rc4encryptionKey[j] ^ i);
                     }
-                    naiveRC4.Initialize(rc4newKey);
-                    naiveRC4.Encrypt(rc4outBuffer, rc4outBuffer);
+                    CustomARC4.Encrypt(rc4outBuffer, rc4outBuffer, rc4newKey);
                 }
 
-                if (SimpleByteArraysCompare(rc4outBuffer, uEntry16))
+                if (Utils.ByteArraysCompare(rc4outBuffer, uEntry16))
                 {
                     byte[] passwordAsBytes = new byte[passwordSettings.PasswordLength];
                     Buffer.BlockCopy(paddedPassword, 0, passwordAsBytes, 0, passwordSettings.PasswordLength);
@@ -399,9 +394,7 @@ namespace PDFPassRecovery
                 }
                 rc4encryptionKey = newMD5Hash;
 
-                CustomARC4 naiveRC4 = new CustomARC4();
-                naiveRC4.Initialize(rc4encryptionKey);
-                naiveRC4.Encrypt(md35.Hash, rc4outBuffer);
+                CustomARC4.Encrypt(md35.Hash, rc4outBuffer, rc4encryptionKey);
 
                 for (int i = 1; i < 20; i++)
                 {
@@ -410,11 +403,10 @@ namespace PDFPassRecovery
                     {
                         rc4newKey[j] = (byte)(rc4encryptionKey[j] ^ i);
                     }
-                    naiveRC4.Initialize(rc4newKey);
-                    naiveRC4.Encrypt(rc4outBuffer, rc4outBuffer);
+                    CustomARC4.Encrypt(rc4outBuffer, rc4outBuffer, rc4newKey);
                 }
 
-                if (SimpleByteArraysCompare(rc4outBuffer, uEntry16))
+                if (Utils.ByteArraysCompare(rc4outBuffer, uEntry16))
                 {
                     byte[] passwordAsBytes = new byte[passwordSettings.PasswordLength];
                     Buffer.BlockCopy(paddedPassword, 0, passwordAsBytes, 0, passwordSettings.PasswordLength);
@@ -452,7 +444,7 @@ namespace PDFPassRecovery
                 SHA256 sha256 = SHA256.Create();
                 sha256.TransformFinalBlock(paddedPassword, 0, paddedPassword.Length);
 
-                if (SimpleByteArraysCompare(sha256.Hash, uEntryToCompare))
+                if (Utils.ByteArraysCompare(sha256.Hash, uEntryToCompare))
                 {
                     string passwordAsString = Encoding.UTF8.GetString(password);
 
@@ -562,7 +554,7 @@ namespace PDFPassRecovery
                 byte[] finalKToCompare = new byte[32];
                 Buffer.BlockCopy(K, 0, finalKToCompare, 0, 32);
 
-                if (SimpleByteArraysCompare(finalKToCompare, uEntryToCompare))
+                if (Utils.ByteArraysCompare(finalKToCompare, uEntryToCompare))
                 {
                     string passwordAsString = Encoding.UTF8.GetString(password);
 
@@ -572,174 +564,6 @@ namespace PDFPassRecovery
 
             // No password found
             return (string.Empty, passwordsCounter);
-        }
-        #endregion
-
-        /// <summary>
-        /// Function claculates a number of passwords to check based on the password length and alphabet
-        /// </summary>
-        /// <param name="passwordLength">Length of the password</param>
-        /// <param name="alphabet">Password alphabet</param>
-        /// <param name="startString">Password to start with</param>
-        /// <returns>A number of passwords to go through</returns>
-        public static long CalculateTotalPasswordsNumber(int passwordLength, int alphabetLength)
-        {
-            long totalPasswords = (long)Math.Pow(alphabetLength, passwordLength);
-
-            return totalPasswords;
-        }
-
-        /// <summary>
-        /// Simple (no input validity checks for the purpose of speed) comparision of 2 arrays of bytes
-        /// </summary>
-        /// <param name="firstArray">First byte array</param>
-        /// <param name="secondArray">Second byte array</param>
-        /// <returns>True if the data in the arrays is the same</returns>
-        private static bool SimpleByteArraysCompare(byte[] firstArray, byte[] secondArray)
-        {
-            for (int i = 0; i < firstArray.Length; i++)
-            {
-                if (firstArray[i] != secondArray[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        #region ***** CONVERTION FUNCTIONS *****
-        /// <summary>
-        /// Method converts a hexadecimal string into a byte array. The size of the byte array is 2 times smaller than the length of the input string
-        /// </summary>
-        /// <param name="hexString">Hexadecimal string</param>
-        /// <returns>Byte array of converted values</returns>
-        /// <exception cref="ArgumentException">This exception is thrown, if the input string is null or empty</exception>
-        /// <exception cref="FormatException">This exception is thrown, if the input string contains characters that are not possible to convert into a byte</exception>
-        public static byte[] ConvertHexStringToByteArray(string hexString)
-        {
-            if (string.IsNullOrEmpty(hexString))
-            {
-                throw new ArgumentException($"The input hex string can't be null or empty");
-            }
-
-            // Per PDF specification we need to add a "0" to the end of the hex string, if the length is odd
-            string innerString = hexString;
-            if (hexString.Length % 2 != 0) innerString += '0';
-
-            byte[] outArray = new byte[innerString.Length / 2];
-            try
-            {
-                int idCnt = 0;
-                string tempString;
-
-                // Converting a hex string into a byte array by converting every 2 sequential symbols into a byte
-                for (int i = 0; i < innerString.Length; i += 2)
-                {
-                    tempString = innerString.Substring(i, 2);
-                    outArray[idCnt] = byte.Parse(tempString, NumberStyles.AllowHexSpecifier);
-                    idCnt++;
-                }
-            }
-            catch (FormatException ex)
-            {
-                throw new FormatException($"The hex string provided contains non-hex characters", ex);
-            }
-            return outArray;
-        }
-        #endregion
-
-        #region ***** PRINT FUNCTIONS *****
-        /// <summary>
-        /// Function prints the usage of the program, if no command line arguments were provided
-        /// </summary>
-        public static void PrintHelp()
-        {
-            Console.WriteLine($"Usage:{Environment.NewLine} PDFPassRecover.exe file_name.pdf{Environment.NewLine}");
-        }
-
-        /// <summary>
-        /// Prints a fatal message in red color
-        /// </summary>
-        /// <param name="message">Message to print</param>
-        /// <param name="writeLine">True will print a new line character</param>
-        public static void PrintFatal(string message, bool writeLine = true)
-        {
-            ConsoleColor originalColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-
-            if (writeLine)
-            {
-                Console.WriteLine(message);
-            }
-            else
-            {
-                Console.Write(message);
-            }
-            Console.ForegroundColor = originalColor;
-        }
-
-        /// <summary>
-        /// Prints a fatal message in yellow color
-        /// </summary>
-        /// <param name="message">Message to print</param>
-        /// <param name="writeLine">True will print a new line character</param>
-        public static void PrintWarning(string message, bool writeLine = true)
-        {
-            ConsoleColor originalColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-
-            if (writeLine)
-            {
-                Console.WriteLine(message);
-            }
-            else
-            {
-                Console.Write(message);
-            }
-            Console.ForegroundColor = originalColor;
-        }
-
-        /// <summary>
-        /// Prints a fatal message in green color
-        /// </summary>
-        /// <param name="message">Message to print</param>
-        /// <param name="writeLine">True will print a new line character</param>
-        public static void PrintInfo(string message, bool writeLine = true)
-        {
-            ConsoleColor originalColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            if (writeLine)
-            {
-                Console.WriteLine(message);
-            }
-            else
-            {
-                Console.Write(message);
-            }
-            Console.ForegroundColor = originalColor;
-        }
-
-        /// <summary>
-        /// Function prints a text to the console in the selected color
-        /// </summary>
-        /// <param name="message">Message to be printed</param>
-        /// <param name="textColor">Color specified as ConsoleColor enum</param>
-        /// <param name="writeLine">True will print a new line character</param>
-        public static void PrintColoredText(string message, ConsoleColor textColor, bool writeLine = true)
-        {
-            ConsoleColor originalColor = Console.ForegroundColor;
-            Console.ForegroundColor = textColor;
-
-            if (writeLine)
-            {
-                Console.WriteLine(message);
-            }
-            else
-            {
-                Console.Write(message);
-            }
-            Console.ForegroundColor = originalColor;
         }
         #endregion
     }

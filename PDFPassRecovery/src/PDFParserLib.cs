@@ -16,33 +16,28 @@ namespace PDFPassRecovery
         /// <exception cref="InvalidDataException">The exception is thrown, if one of the checks fail</exception>
         public static void CheckPDFValidity(PDFFileContent fileContent)
         {
-            if (fileContent is null)
-            {
-                throw new ArgumentNullException("The file content cannot be null or empty");
-            }
-
-            Console.Write("Checking the presense of the standard header...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write("Checking the presense of the standard header...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             // 1st check of the valid PDF- whether the "%PDF" string presents in the file
-            if (!IsPDFFileHeaderPresent(fileContent))
+            if (!IsPDFHeaderPresent(fileContent))
             {
                 throw new InvalidDataException("The standard PDF header is missing");
             }
-            PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
+            Utils.PrintOK("OK");
 
-            Console.Write("Checking the presense of the standard trailer...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write("Checking the presense of the standard trailer...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             // 2nd check of the valid PDF- whether the "%%EOF" string is in the end of the file
-            if (!IsPDFFileTrailerPresent(fileContent))
+            if (!IsPDFTrailerPresent(fileContent))
             {
                 throw new InvalidDataException("The standard PDF trailer is missing");
             }
-            PDFPassRecoverLib.PrintColoredText("OK", ConsoleColor.Green);
+            Utils.PrintOK("OK");
 
-            Console.Write("Checking if the file is encrypted...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write("Checking if the file is encrypted...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             if (!IsEncryptionObjectPresent(fileContent))
             {
                 throw new InvalidDataException("The PDF file is not encrypted");
             }
-            PDFPassRecoverLib.PrintColoredText("Yes", ConsoleColor.Green);
+            Utils.PrintOK("Yes");
         }
 
         /// <summary>
@@ -51,7 +46,7 @@ namespace PDFPassRecovery
         /// <param name="fileContent">Content of a file as a string</param>
         /// <returns>True, if header has been found</returns>
         /// <exception cref="ArgumentException">The "ArgumentException" is raised, if the content of the string passed is null or empty</exception>
-        static bool IsPDFFileHeaderPresent(PDFFileContent fileContent)
+        static bool IsPDFHeaderPresent(PDFFileContent fileContent)
         {
             const string PDF_HEADER = "%PDF";
             if (fileContent.AsString.Contains(PDF_HEADER))
@@ -68,7 +63,7 @@ namespace PDFPassRecovery
         /// <param name="fileContent">Content of a file as a string</param>
         /// <returns>True, if the trailer has been found</returns>
         /// <exception cref="ArgumentException">The "ArgumentException" is raised, if the content of the string passed is null or empty</exception>
-        static bool IsPDFFileTrailerPresent(PDFFileContent fileContent)
+        static bool IsPDFTrailerPresent(PDFFileContent fileContent)
         {
             const string PDF_TRAILER = "%%EOF";
             if (fileContent.AsString.Contains(PDF_TRAILER))
@@ -388,7 +383,7 @@ namespace PDFPassRecovery
                         hexadecimalStr += Convert.ToChar(inputArray[curPointer]);
                         curPointer++;
                     }
-                    outArray = PDFPassRecoverLib.ConvertHexStringToByteArray(hexadecimalStr);
+                    outArray = Utils.ConvertHexStrToByteArr(hexadecimalStr);
                     break;
 
                 case '(':
@@ -540,7 +535,7 @@ namespace PDFPassRecovery
                 throw new InvalidDataException($"The extracted \"/ID\" array is too short");
             }
 
-            byte[] idArray = PDFPassRecoverLib.ConvertHexStringToByteArray(idFirstValue);
+            byte[] idArray = Utils.ConvertHexStrToByteArr(idFirstValue);
 
             return idArray;
         }

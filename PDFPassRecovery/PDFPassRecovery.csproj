@@ -18,4 +18,8 @@
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>
   </ItemGroup>
+	<!--	<ItemGroup> -->
+		<!-- Forces the .NET runtime to hide AVX-512 capability from the JIT -->
+	<!-- <RuntimeHostConfigurationOption Include="System.Runtime.Intrinsics.X86.Avx512F.IsSupported" Vale="false" /> -->
+		<!--</ItemGroup> -->
 </Project>

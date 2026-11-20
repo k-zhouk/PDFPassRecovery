@@ -12,124 +12,126 @@ namespace PDFPassRecovery
             string programVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             Console.WriteLine($"{Environment.NewLine}... PDF Password Recovery Tool (ver. {programVer}) ...{Environment.NewLine}");
 
-            FileInfo fi = null;
-            string fullFileName = string.Empty;
-
-            switch (args.Length)
+            // Step 1: Checking program arguments
+            string fileName = string.Empty;
+            string programArgsCheck = Utils.CheckProgramArgs(args);
+            if (programArgsCheck != string.Empty)
             {
-                case 0:
-                    PDFPassRecoverLib.PrintColoredText($"No arguments have been provided!", ConsoleColor.Red);
-                    PDFPassRecoverLib.PrintHelp();
-                    Environment.Exit(0);
-                    break;
-
-                case 1:
-                    string programArg = args[0];
-
-                    // Display help
-                    if (programArg == "-h")
-                    {
-                        PDFPassRecoverLib.PrintHelp();
-                        Environment.Exit(0);
-                    }
-
-                    // Otherwise treat the 1st argument as a path to the PDF file
-                    fi = new FileInfo(programArg);
-                    if (!fi.Exists)
-                    {
-                        PDFPassRecoverLib.PrintColoredText($"{Environment.NewLine}The file \"{programArg}\" doesn't exist", ConsoleColor.Red);
-                        Environment.Exit(1);
-                    }
-                    break;
-
-                default:
-                    PDFPassRecoverLib.PrintFatal($"Too many arguments");
-                    PDFPassRecoverLib.PrintHelp();
-                    Environment.Exit(1);
-                    break;
+                Utils.PrintError(programArgsCheck);
+                Environment.Exit(1);
+            }
+            else
+            {
+                fileName = args[0];
             }
 
+            // Step 2: Getting initial password configuration
             AppSettings appSettings = null;
             PassSettings passwordSettings = null;
-
-            // Getting initial password configuration
-            Console.Write($"Getting program and initial password configuration...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write($"Getting program and initial password configuration...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             try
             {
-                appSettings = PDFPassConfigParser.GetAppSettings();
-                passwordSettings = PDFPassConfigParser.GetInitPassSettings();
+                appSettings = ConfigParser.GetAppSettings();
+                passwordSettings = ConfigParser.GetInitPassSettings();
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintFatal($"{Environment.NewLine}Error parsing configuration file: {ex.Message}");
+                Utils.PrintError($"{Environment.NewLine}Error parsing configuration file: {ex.Message}");
                 Environment.Exit(0);
             }
-            PDFPassRecoverLib.PrintInfo($"OK");
+            Utils.PrintOK($"OK", false);
 
-            /**************************************** MAIN BODY ****************************************/
-            Console.Write($"Checking the file...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
 
+            // Step 3: Checking the PDF validity
+            Console.Write($"Checking the file...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             Console.WriteLine(Environment.NewLine);
-            Console.Write($"Checking the file extension...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-            string fileExtension = Path.GetExtension(fullFileName).ToUpper();
+
+            // Step 3.1: Checking file existence
+            Console.Write($"Checking file existence...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
+            FileInfo fi = Utils.CheckFileExists(fileName);
+            if (fi is null)
+            {
+                Utils.PrintError($"{Environment.NewLine}The file \"{fileName}\" doesn't exist");
+                Environment.Exit(1);
+            }
+            Utils.PrintOK($"OK", false);
+
+            // Step 3.2: Checking file extension
+            Console.Write($"Checking the file extension...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
+            string fileExtension = Path.GetExtension(fileName).ToUpper();
             if (fileExtension != ".PDF")
             {
-                PDFPassRecoverLib.PrintFatal($"File extension must be \"PDF\"");
-                Environment.Exit(0);
+                Utils.PrintError($"File extension must be \"PDF\"", false);
+                Environment.Exit(11);
             }
-            PDFPassRecoverLib.PrintInfo($"OK");
+            Utils.PrintOK($"OK", false);
 
-            long fileSize = fi.Length;
-            Console.Write("File size:".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
-            PDFPassRecoverLib.PrintInfo($"{fileSize} (bytes)");
+            // Step 3.3: Checking file size
+            if (fi.Length == 0)
+            {
+                Utils.PrintError($"File is empty", false);
+                Environment.Exit(1);
+            }
+            Console.Write("File size:".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
+            Utils.PrintOK($"{fi.Length} (bytes)", false);
 
+            // Step 3.4: Reading file content
             PDFFileContent pdfFileContent = null;
-            Console.Write("Reading the file content...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write("Reading the file content...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             try
             {
-                pdfFileContent = PDFParserLib.GetPDFFileContent(fullFileName);
+                pdfFileContent = PDFParserLib.GetPDFFileContent(fileName);
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintFatal($"Error happened while file reading: {ex.Message}");
-                Environment.Exit(0);
+                Utils.PrintError($"Error happened while file reading: {ex.Message}");
+                Environment.Exit(1);
             }
-            PDFPassRecoverLib.PrintInfo("OK");
+            Utils.PrintOK("OK");
 
+            // 
             Console.WriteLine();
-            Console.WriteLine($"Checking PDF file validity...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.WriteLine($"Checking PDF file validity...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             try
             {
                 PDFParserLib.CheckPDFValidity(pdfFileContent);
             }
             catch (Exception ex)
             {
-                PDFPassRecoverLib.PrintFatal($"{ex.Message}");
+                Utils.PrintError($"{ex.Message}");
                 Environment.Exit(0);
             }
 
-            Console.Write($"Checking PDF version...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+
+
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+            Console.Write($"Checking PDF version...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             string pdfVersion = PDFParserLib.GetPDFVersion(pdfFileContent.AsString);
             Console.Write($"{pdfVersion}");
             Console.WriteLine();
 
-            Console.Write($"Extracting password related data...".PadRight(PDFPassConstants.PADDING_OFFSET, PDFPassConstants.PADDING_CHAR));
+            Console.Write($"Extracting password related data...".PadRight(Constants.PADDING_OFFSET, Constants.PADDING_CHAR));
             SecHandlerR2PasswordData passwordData = PDFParserLib.ExtractPasswordData(pdfFileContent);
-            PDFPassRecoverLib.PrintInfo($"Done");
+            Utils.PrintOK($"Done");
 
             if (passwordData.GetType() == typeof(SecHandlerR2PasswordData))
             {
-                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR2Password, passwordData, passwordSettings);
+                RecoveryLib.RestoreEncryptedPassword(RecoveryLib.BruteForceSecHandlerR2Password, passwordData, passwordSettings);
             }
-            
+
             if (passwordData.GetType() == typeof(SecHandlerR3PasswordData))
             {
-                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR3Password, (SecHandlerR3PasswordData)passwordData, passwordSettings);
+                RecoveryLib.RestoreEncryptedPassword(RecoveryLib.BruteForceSecHandlerR3Password, (SecHandlerR3PasswordData)passwordData, passwordSettings);
             }
-            
+
             if (passwordData.GetType() == typeof(SecHandlerR4PasswordData))
             {
-                PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR4Password, (SecHandlerR4PasswordData)passwordData, passwordSettings);
+                RecoveryLib.RestoreEncryptedPassword(RecoveryLib.BruteForceSecHandlerR4Password, (SecHandlerR4PasswordData)passwordData, passwordSettings);
             }
 
             if (passwordData.GetType() == typeof(SecHandlerR6PasswordData))
@@ -137,10 +139,10 @@ namespace PDFPassRecovery
                 switch (passwordData.R)
                 {
                     case 5:
-                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR5Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
+                        RecoveryLib.RestoreEncryptedPassword(RecoveryLib.BruteForceSecHandlerR5Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
                         break;
                     case 6:
-                        PDFPassRecoverLib.RestoreEncryptedPassword(PDFPassRecoverLib.BruteForceSecHandlerR6Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
+                        RecoveryLib.RestoreEncryptedPassword(RecoveryLib.BruteForceSecHandlerR6Password, (SecHandlerR6PasswordData)passwordData, passwordSettings);
                         break;
                 }
             }

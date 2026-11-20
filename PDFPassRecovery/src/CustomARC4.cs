@@ -1,16 +1,24 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace PDFPassRecovery
 {
     /// <summary>
-    /// Customized implementation of the ARC4 algorithm to speed up password recovery
-    /// Optimization 1: The shadow state array is a constant string that is copied for every initialization
-    /// Optimization 2: As the state array length is 256 bytes, the modulo operation is replaced with the "&0xFF" operation in some cases
+    /// Customized implementation of the ARC4 algorithm to speed up password recovery. Optimizations done:
+    /// 1: The shadow state array is a readonly static memory span that is copied for every initialization
+    /// 2: As the state array length is 256 bytes always, the modulo operation is replaced with the "&0xFF" operation in some cases
+    /// 3: Initialization and encryption are combined into a single method
+    /// 4: The state array is allocated on the stack to avoid heap allocation and garbage collection
+    /// 5: The class and methods are static to avoid object creation
     /// </summary>
-    class CustomARC4
+    static class CustomARC4
     {
+        // Size of the state array
+        const int STATE_ARRAY_LENGTH = 256;
+
         // Shadow state array as a constant array to avoid reinitialization
-        readonly byte[] shadowS = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+        private static ReadOnlySpan<byte> shadowS =>
+          [ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
             0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
             0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
             0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F,
@@ -25,38 +33,30 @@ namespace PDFPassRecovery
             0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF,
             0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
             0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
-            0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF };
+            0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF ];
 
-        // Size of the state array
-        const int STATE_ARRAY_LENGTH = 256;
-
-        // State array
-        byte[] S = new byte[STATE_ARRAY_LENGTH];
-
-        // Key scheduling algorithm (KSA)
-        public void Initialize(byte[] key)
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static void Encrypt(ReadOnlySpan<byte> input, Span<byte> output, ReadOnlySpan<byte> key)
         {
-            Buffer.BlockCopy(shadowS, 0, S, 0, STATE_ARRAY_LENGTH);
+            Span<byte> S = stackalloc byte[STATE_ARRAY_LENGTH];
+            shadowS.CopyTo(S);
 
+            // Key scheduling algorithm (KSA)
             byte temp;
-            int j = 0;
-            for (int i = 0; i < STATE_ARRAY_LENGTH; i++)
-            {
-                j = (j + S[i] + key[i % key.Length]) & 0xFF;
 
-                // Swap S[i] and S[j]
-                temp = S[i];
-                S[i] = S[j];
-                S[j] = temp;
-            }
-        }
-
-        public void Encrypt(byte[] input, byte[] output)
-        {
-            byte temp;
             int i = 0;
-            int j = 0;
+            for (int cnt = 0; cnt < STATE_ARRAY_LENGTH; cnt++)
+            {
+                i = (i + S[cnt] + key[cnt % key.Length]) & 0xFF;
 
+                temp = S[cnt];
+                S[cnt] = S[i];
+                S[i] = temp;
+            }
+
+            // Pseudo-random generation algorithm (PRGA)
+            i = 0;
+            int j = 0;
             for (int cnt = 0; cnt < input.Length; cnt++)
             {
                 i = (i + 1) & 0xFF;
@@ -69,6 +69,7 @@ namespace PDFPassRecovery
 
                 output[cnt] = (byte)(input[cnt] ^ S[(S[i] + S[j]) & 0xFF]);
             }
+
         }
     }
 }
